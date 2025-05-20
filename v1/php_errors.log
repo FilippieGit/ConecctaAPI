@@ -1,0 +1,12 @@
+[16-May-2025 21:44:34 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Cannot add or update a child row: a foreign key constraint fails (`dbconeccta`.`vagas`, CONSTRAINT `vagas_ibfk_2` FOREIGN KEY (`id_candidato`) REFERENCES `candidato` (`id_candidato`) ON DELETE CASCADE) in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php:56
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(56): mysqli_stmt->execute()
+#1 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(143): DbOperation->cadastrarVagas('Desenvolvedor A...', 'Remoto', 'Desenvolver apl...', 'Kotlin, Java, A...', '5000.00', 'CLT', 'TI', '1')
+#2 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php on line 56
+[16-May-2025 21:46:23 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Column 'id_candidato' cannot be null in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php:61
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(61): mysqli_stmt->execute()
+#1 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(143): DbOperation->cadastrarVagas('Desenvolvedor A...', 'Remoto', 'Desenvolver apl...', 'Kotlin, Java, A...', '5000.00', 'CLT', 'TI', '1')
+#2 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php on line 61

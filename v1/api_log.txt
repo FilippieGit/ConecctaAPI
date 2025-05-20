@@ -1,0 +1,13 @@
+2025-05-16 21:42:02 - Requisição recebida: Array
+(
+    [apicall] => cadastrarVaga
+    [titulo] => Desenvolvedor Android
+    [localizacao] => Remoto
+    [descricao] => Desenvolver aplicativos móveis com Kotlin
+    [requisitos] => Kotlin, Java, Android SDK
+    [salario] => 5000.00
+    [tipo_contrato] => CLT
+    [area_atuacao] => TI
+    [id_empresa] => 1
+)
+

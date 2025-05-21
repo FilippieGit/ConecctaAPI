@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Teste API - Cadastrar Vaga</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
@@ -19,10 +19,10 @@
     <h1>Teste API Cadastrar Vaga</h1>
     <form id="formVaga">
         <label>Título da Vaga:</label>
-        <input type="text" name="titulo" value="Desenvolvedor Android" required>
+        <input type="text" name="titulo" value="Desenvolvedor Android" required />
 
         <label>Localização:</label>
-        <input type="text" name="localizacao" value="Remoto" required>
+        <input type="text" name="localizacao" value="Remoto" required />
 
         <label>Descrição:</label>
         <textarea name="descricao" rows="3" required>Desenvolver aplicativos móveis com Kotlin</textarea>
@@ -30,17 +30,20 @@
         <label>Requisitos:</label>
         <textarea name="requisitos" rows="2" required>Kotlin, Java, Android SDK</textarea>
 
+        <label>Benefícios:</label>
+        <textarea name="beneficios" rows="2" placeholder="Ex: Vale transporte, Vale refeição" required></textarea>
+
         <label>Salário:</label>
-        <input type="text" name="salario" value="5000.00" required>
+        <input type="text" name="salario" value="5000.00" required />
 
         <label>Tipo de Contrato:</label>
-        <input type="text" name="tipo_contrato" value="CLT" required>
+        <input type="text" name="tipo_contrato" value="CLT" required />
 
         <label>Área de Atuação:</label>
-        <input type="text" name="area_atuacao" value="TI" required>
+        <input type="text" name="area_atuacao" value="TI" required />
 
         <label>ID da Empresa:</label>
-        <input type="number" name="id_empresa" value="1" required>
+        <input type="number" name="id_empresa" value="1" required />
 
         <button type="submit">Enviar</button>
     </form>
@@ -53,52 +56,51 @@
     <div id="result"></div>
 
     <script>
-document.getElementById('formVaga').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const params = new URLSearchParams(formData);
-    
-    fetch('http://localhost/ConecctaAPI/v1/Api.php?apicall=cadastrarVaga', {
-        method: 'POST',
-        body: params,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    })
-    .then(response => {
-        // Verificar se a resposta parece ser JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            return response.text().then(text => {
-                throw new Error(`Resposta não é JSON: ${text.substring(0, 100)}...`);
+        document.getElementById('formVaga').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const params = new URLSearchParams(formData);
+
+            fetch('http://localhost/ConecctaAPI/v1/Api.php?apicall=cadastrarVaga', {
+                method: 'POST',
+                body: params,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => {
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    return response.text().then(text => {
+                        throw new Error(`Resposta não é JSON: ${text.substring(0, 100)}...`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Resposta:', data);
+                document.getElementById('result').innerHTML = `
+                    <h3>Resposta da API:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    ${data.error ? '<p style="color:red">Erro no cadastro</p>' : '<p style="color:green">Vaga cadastrada com sucesso!</p>'}
+                `;
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                document.getElementById('result').innerHTML = `
+                    <h3 style="color:red">Erro na comunicação com a API</h3>
+                    <p><strong>Mensagem:</strong> ${error.message}</p>
+                    <p><strong>Possíveis causas:</strong></p>
+                    <ul>
+                        <li>Erro no servidor PHP (verifique php_errors.log)</li>
+                        <li>Resposta não está em formato JSON</li>
+                        <li>Problema de CORS (verifique o console do navegador)</li>
+                    </ul>
+                    <p>Verifique o console do navegador (F12) para mais detalhes.</p>
+                `;
             });
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Resposta:', data);
-        document.getElementById('result').innerHTML = `
-            <h3>Resposta da API:</h3>
-            <pre>${JSON.stringify(data, null, 2)}</pre>
-            ${data.error ? '<p style="color:red">Erro no cadastro</p>' : '<p style="color:green">Vaga cadastrada com sucesso!</p>'}
-        `;
-    })
-    .catch(error => {
-        console.error('Erro:', error);
-        document.getElementById('result').innerHTML = `
-            <h3 style="color:red">Erro na comunicação com a API</h3>
-            <p><strong>Mensagem:</strong> ${error.message}</p>
-            <p><strong>Possíveis causas:</strong></p>
-            <ul>
-                <li>Erro no servidor PHP (verifique php_errors.log)</li>
-                <li>Resposta não está em formato JSON</li>
-                <li>Problema de CORS (verifique o console do navegador)</li>
-            </ul>
-            <p>Verifique o console do navegador (F12) para mais detalhes.</p>
-        `;
-    });
-});
-</script>
+        });
+    </script>
 </body>
 </html>

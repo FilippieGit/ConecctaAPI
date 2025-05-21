@@ -12,7 +12,7 @@ class DbOperation
     }
 
     // visualizar vagas
-    function getcadastrarVagas() {
+    function getVagas() {
     $stmt = $this->con->prepare("
         SELECT 
             v.id_vagas, 
@@ -71,9 +71,8 @@ class DbOperation
     return $tbVagas;
 }
 
-
-    // Cadastro Candidato
-    function cadastrarVagas($titulo, $localizacao, $descricao, $requisitos, $salario, $tipo_contrato, $area_atuacao, $id_empresa) {
+// cadastrar vagas
+function cadastrarVagas($titulo, $localizacao, $descricao, $requisitos, $salario, $tipo_contrato, $area_atuacao, $id_empresa, $beneficios) {
     try {
         $stmt = $this->con->prepare("INSERT INTO vagas (
             titulo_vagas, 
@@ -84,35 +83,38 @@ class DbOperation
             vinculo_vagas, 
             ramo_vagas, 
             id_empresa,
+            beneficios_vagas,
             id_candidato
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)"); // NULL para id_candidato
-        
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)");
+
         if (!$stmt) {
             throw new Exception('Erro na preparação: ' . $this->con->error);
         }
-        
-        $stmt->bind_param("sssssssi", 
-            $titulo,
-            $localizacao,
-            $descricao,
-            $requisitos,
-            $salario,
-            $tipo_contrato,
-            $area_atuacao,
-            $id_empresa
-        );
-        
+
+        $stmt->bind_param("sssssssis", 
+    $titulo,
+    $localizacao,
+    $descricao,
+    $requisitos,
+    $salario,
+    $tipo_contrato,
+    $area_atuacao,
+    $id_empresa,
+    $beneficios
+);
+
+
         if (!$stmt->execute()) {
             throw new Exception('Erro na execução: ' . $stmt->error);
         }
-        
+
         return [
             'error' => false,
             'message' => 'Vaga cadastrada com sucesso',
             'id_vaga' => $stmt->insert_id,
             'affected_rows' => $stmt->affected_rows
         ];
-        
+
     } catch (Exception $e) {
         return [
             'error' => true,
@@ -121,6 +123,50 @@ class DbOperation
         ];
     }
 }
+
+// excluir vagas
+function excluirVagas($id_vaga) {
+    try {
+        // Verifica se a vaga existe antes de tentar excluir
+        $stmt = $this->con->prepare("SELECT id_vagas FROM vagas WHERE id_vagas = ?");
+        $stmt->bind_param("i", $id_vaga);
+        $stmt->execute();
+        $stmt->store_result();
+        
+        if ($stmt->num_rows == 0) {
+            throw new Exception('Vaga não encontrada');
+        }
+        $stmt->close();
+
+        // Prepara a query de exclusão
+        $stmt = $this->con->prepare("DELETE FROM vagas WHERE id_vagas = ?");
+        if (!$stmt) {
+            throw new Exception('Erro na preparação: ' . $this->con->error);
+        }
+
+        $stmt->bind_param("i", $id_vaga);
+
+        if (!$stmt->execute()) {
+            throw new Exception('Erro na execução: ' . $stmt->error);
+        }
+
+        return [
+            'error' => false,
+            'message' => 'Vaga excluída com sucesso',
+            'affected_rows' => $stmt->affected_rows
+        ];
+
+    } catch (Exception $e) {
+        return [
+            'error' => true,
+            'message' => $e->getMessage(),
+            'sql_error' => $this->con->error ?? null
+        ];
+    }
+}
+
+
+
 
 
     

@@ -108,3 +108,41 @@ Stack trace:
 #2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
 #3 {main}
   thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 17:19:22 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php:95
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(95): mysqli_stmt->bind_param('sssssssiss', '999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#1 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(159): DbOperation->cadastrarVagas('999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#2 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php on line 95
+[21-May-2025 17:19:30 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php:95
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(95): mysqli_stmt->bind_param('sssssssiss', '999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#1 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(159): DbOperation->cadastrarVagas('999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#2 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php on line 95
+[21-May-2025 17:19:31 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php:95
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(95): mysqli_stmt->bind_param('sssssssiss', '999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#1 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(159): DbOperation->cadastrarVagas('999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#2 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php on line 95
+[21-May-2025 17:19:32 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php:95
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(95): mysqli_stmt->bind_param('sssssssiss', '999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#1 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(159): DbOperation->cadastrarVagas('999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#2 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php on line 95
+[21-May-2025 17:19:32 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php:95
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(95): mysqli_stmt->bind_param('sssssssiss', '999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#1 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(159): DbOperation->cadastrarVagas('999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#2 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php on line 95
+[21-May-2025 17:19:33 Europe/Berlin] PHP Fatal error:  Uncaught ArgumentCountError: The number of elements in the type definition string must match the number of bind variables in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php:95
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(95): mysqli_stmt->bind_param('sssssssiss', '999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#1 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(159): DbOperation->cadastrarVagas('999', '9', '999', '9', '999', 'CLT', 'Tecnologia da I...', '1', '99')
+#2 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php on line 95
+[21-May-2025 17:22:28 Europe/Berlin] PHP Parse error:  Unmatched '}' in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php on line 273
+[21-May-2025 17:22:30 Europe/Berlin] PHP Parse error:  Unmatched '}' in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php on line 273

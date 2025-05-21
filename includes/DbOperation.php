@@ -11,91 +11,7 @@ class DbOperation
         $this->con = $db->connect();
     }
 
-    // Exemplo BD
-    function createHero($name, $realname, $rating, $teamaffiliation){
-        $stmt = $this->con->prepare("INSERT INTO heroes (name, realname, rating, teamaffiliation) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssis", $name, $realname, $rating, $teamaffiliation);
-        return $stmt->execute();
-    }
-
-    // Cadastro Empresa
-    function cadastrarEmpresa($cnpj_empresa, $nome_empresa, $email_empresa, $local_empresa, $porte_empresa){
-        $stmt = $this->con->prepare("INSERT INTO tbEmpresa (cnpj_empresa, nome_empresa, email_empresa, local_empresa, porte_empresa) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $cnpj_empresa, $nome_empresa, $email_empresa, $local_empresa, $porte_empresa);
-        return $stmt->execute();
-    }
-
-
-
-
-
-
-
-    // Cadastro Candidato
-    function cadastrarVagas($titulo, $localizacao, $descricao, $requisitos, $salario, $tipo_contrato, $area_atuacao, $id_empresa) {
-    try {
-        $stmt = $this->con->prepare("INSERT INTO vagas (
-            titulo_vagas, 
-            local_vagas, 
-            descricao_vagas, 
-            requisitos_vagas, 
-            salario_vagas, 
-            vinculo_vagas, 
-            ramo_vagas, 
-            id_empresa,
-            id_candidato
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)"); // NULL para id_candidato
-        
-        if (!$stmt) {
-            throw new Exception('Erro na preparação: ' . $this->con->error);
-        }
-        
-        $stmt->bind_param("sssssssi", 
-            $titulo,
-            $localizacao,
-            $descricao,
-            $requisitos,
-            $salario,
-            $tipo_contrato,
-            $area_atuacao,
-            $id_empresa
-        );
-        
-        if (!$stmt->execute()) {
-            throw new Exception('Erro na execução: ' . $stmt->error);
-        }
-        
-        return [
-            'error' => false,
-            'message' => 'Vaga cadastrada com sucesso',
-            'id_vaga' => $stmt->insert_id,
-            'affected_rows' => $stmt->affected_rows
-        ];
-        
-    } catch (Exception $e) {
-        return [
-            'error' => true,
-            'message' => $e->getMessage(),
-            'sql_error' => $this->con->error ?? null
-        ];
-    }
-}
-
-
-
-
-
-
-
-
-
-    // Cadastro Currículo
-    function cadastrarCurriculo($descricao_curriculo, $exper_profissional_curriculo, $exper_academico_curriculo, $certificados_curriculo, $endereco_curriculo){
-        $stmt = $this->con->prepare("INSERT INTO tbCurriculo (descricao_curriculo, exper_profissional_curriculo, exper_academico_curriculo, certificados_curriculo, endereco_curriculo) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $descricao_curriculo, $exper_profissional_curriculo, $exper_academico_curriculo, $certificados_curriculo, $endereco_curriculo);
-        return $stmt->execute();
-    }
-
+    // visualizar vagas
     function getcadastrarVagas() {
     $stmt = $this->con->prepare("
         SELECT 
@@ -154,6 +70,86 @@ class DbOperation
     $stmt->close();
     return $tbVagas;
 }
+
+
+    // Cadastro Candidato
+    function cadastrarVagas($titulo, $localizacao, $descricao, $requisitos, $salario, $tipo_contrato, $area_atuacao, $id_empresa) {
+    try {
+        $stmt = $this->con->prepare("INSERT INTO vagas (
+            titulo_vagas, 
+            local_vagas, 
+            descricao_vagas, 
+            requisitos_vagas, 
+            salario_vagas, 
+            vinculo_vagas, 
+            ramo_vagas, 
+            id_empresa,
+            id_candidato
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)"); // NULL para id_candidato
+        
+        if (!$stmt) {
+            throw new Exception('Erro na preparação: ' . $this->con->error);
+        }
+        
+        $stmt->bind_param("sssssssi", 
+            $titulo,
+            $localizacao,
+            $descricao,
+            $requisitos,
+            $salario,
+            $tipo_contrato,
+            $area_atuacao,
+            $id_empresa
+        );
+        
+        if (!$stmt->execute()) {
+            throw new Exception('Erro na execução: ' . $stmt->error);
+        }
+        
+        return [
+            'error' => false,
+            'message' => 'Vaga cadastrada com sucesso',
+            'id_vaga' => $stmt->insert_id,
+            'affected_rows' => $stmt->affected_rows
+        ];
+        
+    } catch (Exception $e) {
+        return [
+            'error' => true,
+            'message' => $e->getMessage(),
+            'sql_error' => $this->con->error ?? null
+        ];
+    }
+}
+
+
+    
+
+
+
+
+    
+    // Cadastro Currículo
+    function cadastrarCurriculo($descricao_curriculo, $exper_profissional_curriculo, $exper_academico_curriculo, $certificados_curriculo, $endereco_curriculo){
+        $stmt = $this->con->prepare("INSERT INTO tbCurriculo (descricao_curriculo, exper_profissional_curriculo, exper_academico_curriculo, certificados_curriculo, endereco_curriculo) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", $descricao_curriculo, $exper_profissional_curriculo, $exper_academico_curriculo, $certificados_curriculo, $endereco_curriculo);
+        return $stmt->execute();
+    }
+
+
+    // Exemplo BD
+    function createHero($name, $realname, $rating, $teamaffiliation){
+        $stmt = $this->con->prepare("INSERT INTO heroes (name, realname, rating, teamaffiliation) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("ssis", $name, $realname, $rating, $teamaffiliation);
+        return $stmt->execute();
+    }
+
+    // Cadastro Empresa
+    function cadastrarEmpresa($cnpj_empresa, $nome_empresa, $email_empresa, $local_empresa, $porte_empresa){
+        $stmt = $this->con->prepare("INSERT INTO tbEmpresa (cnpj_empresa, nome_empresa, email_empresa, local_empresa, porte_empresa) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", $cnpj_empresa, $nome_empresa, $email_empresa, $local_empresa, $porte_empresa);
+        return $stmt->execute();
+    }
 
 
     // Listar Empresa

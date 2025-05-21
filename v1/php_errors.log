@@ -10,3 +10,101 @@ Stack trace:
 #1 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(143): DbOperation->cadastrarVagas('Desenvolvedor A...', 'Remoto', 'Desenvolver apl...', 'Kotlin, Java, A...', '5000.00', 'CLT', 'TI', '1')
 #2 {main}
   thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php on line 61
+[21-May-2025 02:19:52 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:22:25 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:23:46 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:24:00 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:24:33 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:24:35 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:24:44 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:24:46 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:24:46 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:24:46 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:24:47 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:24:53 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:24:54 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21
+[21-May-2025 02:24:54 Europe/Berlin] PHP Fatal error:  Uncaught mysqli_sql_exception: Unknown database 'dbconeccta' in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php:21
+Stack trace:
+#0 C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php(21): mysqli->__construct('localhost', 'root', Object(SensitiveParameterValue), 'dbconeccta')
+#1 C:\xampp\htdocs\ConecctaAPI\includes\DbOperation.php(11): DbConnect->connect()
+#2 C:\xampp\htdocs\ConecctaAPI\v1\Api.php(131): DbOperation->__construct()
+#3 {main}
+  thrown in C:\xampp\htdocs\ConecctaAPI\includes\DbConnect.php on line 21

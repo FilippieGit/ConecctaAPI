@@ -8,21 +8,35 @@
         body { font-family: Arial, sans-serif; margin: 20px; }
         form { max-width: 500px; margin: 0 auto; }
         label { display: block; margin-top: 10px; }
-        input, textarea { width: 100%; padding: 8px; margin-top: 5px; }
+        input, textarea, select { width: 100%; padding: 8px; margin-top: 5px; }
         button { background: #4CAF50; color: white; padding: 10px 15px; border: none; cursor: pointer; margin-top: 15px; }
         button:hover { background: #45a049; }
         #result, #debug { margin-top: 20px; padding: 10px; border: 1px solid #ddd; }
         #debug { background-color: #f5f5f5; }
+        .form-row { display: flex; gap: 15px; }
+        .form-row > div { flex: 1; }
+        .loading { color: #2196F3; }
+        .success { color: #4CAF50; }
+        .error { color: #F44336; }
     </style>
 </head>
 <body>
     <h1>Teste API Cadastrar Vaga</h1>
     <form id="formVaga">
+        <!-- Informações básicas -->
         <label>Título da Vaga:</label>
         <input type="text" name="titulo" value="Desenvolvedor Android" required />
 
-        <label>Localização:</label>
-        <input type="text" name="localizacao" value="Remoto" required />
+        <div class="form-row">
+            <div>
+                <label>Localização:</label>
+                <input type="text" name="localizacao" value="Remoto" required />
+            </div>
+            <div>
+                <label>Ramo:</label>
+                <input type="text" name="ramo" value="Tecnologia" required />
+            </div>
+        </div>
 
         <label>Descrição:</label>
         <textarea name="descricao" rows="3" required>Desenvolver aplicativos móveis com Kotlin</textarea>
@@ -30,20 +44,62 @@
         <label>Requisitos:</label>
         <textarea name="requisitos" rows="2" required>Kotlin, Java, Android SDK</textarea>
 
+        <label>Habilidades Desejáveis:</label>
+        <textarea name="habilidades_desejaveis" rows="2" placeholder="Ex: Firebase, Jetpack Compose">Experiência com arquitetura MVVM</textarea>
+
         <label>Benefícios:</label>
-        <textarea name="beneficios" rows="2" placeholder="Ex: Vale transporte, Vale refeição" required></textarea>
+        <textarea name="beneficios" rows="2" placeholder="Ex: Vale transporte, Vale refeição" required>VT, VR, Plano de saúde</textarea>
 
-        <label>Salário:</label>
-        <input type="text" name="salario" value="5000.00" required />
+        <!-- Informações contratuais -->
+        <div class="form-row">
+            <div>
+                <label>Salário:</label>
+                <input type="text" name="salario" value="5000.00" required />
+            </div>
+            <div>
+                <label>Nível de Experiência:</label>
+                <select name="nivel_experiencia" required>
+                    <option value="">Selecione</option>
+                    <option value="Júnior" selected>Júnior</option>
+                    <option value="Pleno">Pleno</option>
+                    <option value="Sênior">Sênior</option>
+                </select>
+            </div>
+        </div>
 
-        <label>Tipo de Contrato:</label>
-        <input type="text" name="tipo_contrato" value="CLT" required />
+        <div class="form-row">
+            <div>
+                <label>Tipo de Contrato:</label>
+                <select name="tipo_contrato" required>
+                    <option value="">Selecione</option>
+                    <option value="CLT" selected>CLT</option>
+                    <option value="PJ">PJ</option>
+                    <option value="Estágio">Estágio</option>
+                    <option value="Temporário">Temporário</option>
+                </select>
+            </div>
+            <div>
+                <label>Vínculo Empregatício:</label>
+                <select name="vinculo_vagas" required>
+                    <option value="">Selecione</option>
+                    <option value="Efetivo" selected>Efetivo</option>
+                    <option value="Temporário">Temporário</option>
+                    <option value="Estágio">Estágio</option>
+                    <option value="Freelancer">Freelancer</option>
+                </select>
+            </div>
+        </div>
 
-        <label>Área de Atuação:</label>
-        <input type="text" name="area_atuacao" value="TI" required />
-
-        <label>ID da Empresa:</label>
-        <input type="number" name="id_empresa" value="1" required />
+        <div class="form-row">
+            <div>
+                <label>Área de Atuação:</label>
+                <input type="text" name="area_atuacao" value="Desenvolvimento Mobile" required />
+            </div>
+            <div>
+                <label>ID da Empresa:</label>
+                <input type="number" name="id_empresa" value="1" required />
+            </div>
+        </div>
 
         <button type="submit">Enviar</button>
     </form>
@@ -56,50 +112,79 @@
     <div id="result"></div>
 
     <script>
-        document.getElementById('formVaga').addEventListener('submit', function(e) {
+        document.getElementById('formVaga').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p class="loading">Enviando dados para a API...</p>';
+            
+            try {
+                const formData = new FormData(this);
+                const params = new URLSearchParams(formData);
+                
+                // Mostrar parâmetros enviados no debug
+                document.getElementById('params').innerHTML = `
+                    <p><strong>Endpoint:</strong> http://localhost/ConecctaAPI/v1/Api.php?apicall=cadastrarVaga</p>
+                    <p><strong>Método:</strong> POST</p>
+                    <p><strong>Parâmetros enviados:</strong></p>
+                    <pre>${params.toString().replace(/&/g, '\n')}</pre>
+                `;
 
-            const formData = new FormData(this);
-            const params = new URLSearchParams(formData);
+                // Adicionar timeout de 15 segundos
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000);
+                
+                const response = await fetch('http://localhost/ConecctaAPI/v1/Api.php?apicall=cadastrarVaga', {
+                    method: 'POST',
+                    body: params,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeout);
 
-            fetch('http://localhost/ConecctaAPI/v1/Api.php?apicall=cadastrarVaga', {
-                method: 'POST',
-                body: params,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                // Verificar se a resposta é válida
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Erro HTTP ${response.status}: ${errorText.substring(0, 200)}`);
                 }
-            })
-            .then(response => {
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    return response.text().then(text => {
-                        throw new Error(`Resposta não é JSON: ${text.substring(0, 100)}...`);
-                    });
+
+                // Tentar parsear como JSON
+                let data;
+                try {
+                    data = await response.json();
+                } catch (jsonError) {
+                    const text = await response.text();
+                    throw new Error(`Resposta inválida (não é JSON): ${text.substring(0, 200)}`);
                 }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Resposta:', data);
-                document.getElementById('result').innerHTML = `
-                    <h3>Resposta da API:</h3>
+
+                // Exibir resultado
+                console.log('Resposta da API:', data);
+                resultDiv.innerHTML = `
+                    <h3 class="${data.error ? 'error' : 'success'}">${data.error ? 'Erro no cadastro' : 'Sucesso!'}</h3>
                     <pre>${JSON.stringify(data, null, 2)}</pre>
-                    ${data.error ? '<p style="color:red">Erro no cadastro</p>' : '<p style="color:green">Vaga cadastrada com sucesso!</p>'}
+                    ${data.id_vaga ? `<p><strong>ID da Vaga:</strong> ${data.id_vaga}</p>` : ''}
+                    ${data.error && data.sql_error ? `<p><strong>Erro SQL:</strong> ${data.sql_error}</p>` : ''}
                 `;
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                document.getElementById('result').innerHTML = `
-                    <h3 style="color:red">Erro na comunicação com a API</h3>
+
+            } catch (error) {
+                console.error('Erro completo:', error);
+                resultDiv.innerHTML = `
+                    <h3 class="error">Erro na comunicação com a API</h3>
                     <p><strong>Mensagem:</strong> ${error.message}</p>
-                    <p><strong>Possíveis causas:</strong></p>
+                    <p><strong>Detalhes:</strong></p>
+                    <pre>${error.stack || 'Nenhum detalhe adicional disponível'}</pre>
+                    <p><strong>Verifique:</strong></p>
                     <ul>
-                        <li>Erro no servidor PHP (verifique php_errors.log)</li>
-                        <li>Resposta não está em formato JSON</li>
-                        <li>Problema de CORS (verifique o console do navegador)</li>
+                        <li>Se o servidor PHP está rodando</li>
+                        <li>Se há erros no console do PHP (php_errors.log)</li>
+                        <li>Se todos campos obrigatórios foram preenchidos</li>
+                        <li>Se a URL da API está correta</li>
                     </ul>
-                    <p>Verifique o console do navegador (F12) para mais detalhes.</p>
                 `;
-            });
+            }
         });
     </script>
 </body>

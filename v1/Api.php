@@ -1,61 +1,77 @@
 <?php
+// Configurações iniciais
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json; charset=UTF-8");
+ini_set('display_errors', 0);
+error_reporting(0);
 
+// Limpar buffer de saída
+ob_clean();
+
+// Tratar requisições OPTIONS para CORS
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
+// Incluir arquivo necessário
 require_once '../includes/DbOperation.php';
 
-function isTheseParametersAvailable($params){
-    $available = true; 
-    $missingparams = ""; 
+/**
+ * Verifica se os parâmetros necessários estão disponíveis
+ */
+function isTheseParametersAvailable($params) {
+    $missing = array();
     
-    foreach($params as $param){
-        if(!isset($_POST[$param]) || strlen($_POST[$param])<=0){
-            $available = false; 
-            $missingparams .= ", " . $param; 
+    foreach($params as $param) {
+        if(!isset($_POST[$param])) {
+            $missing[] = $param;
+        } elseif(is_string($_POST[$param]) && trim($_POST[$param]) === '') {
+            $missing[] = $param;
         }
     }
     
-    if(!$available){
-        $response = array(); 
-        $response['error'] = true; 
-        $response['message'] = 'Parameters ' . substr($missingparams, 2) . ' missing';
+    if(!empty($missing)) {
+        $response = array(
+            'error' => true,
+            'message' => 'Parâmetros faltando: ' . implode(', ', $missing)
+        );
         echo json_encode($response);
-        exit(); // substitui die() por exit()
+        exit();
     }
 }
 
-$response = array();
+// Inicializar array de resposta
+$response = array('error' => true, 'message' => 'Nenhuma operação especificada');
 
-if(isset($_GET['apicall'])){
-    switch($_GET['apicall']){
+// Verificar se é uma chamada de API válida
+if(isset($_GET['apicall'])) {
+    switch($_GET['apicall']) {
         case 'getVagas':
             try {
                 $db = new DbOperation();
                 $vagas = $db->getVagas();
                 
-                $response = [
+                $response = array(
                     'error' => false,
                     'message' => 'Lista de vagas obtida com sucesso',
                     'vagas' => $vagas,
                     'count' => count($vagas)
-                ];
+                );
             } catch (Exception $e) {
-                $response = [
+                $response = array(
                     'error' => true,
-                    'message' => 'Erro ao obter vagas: ' . $e->getMessage()
-                ];
+                    'message' => 'Erro ao obter vagas: ' . $e->getMessage(),
+                    'trace' => (defined('ENVIRONMENT') && ENVIRONMENT === 'development') ? $e->getTrace() : null
+                );
             }
             break;
 
         case 'cadastrarVaga':
+            // Verificar parâmetros obrigatórios
             isTheseParametersAvailable(array(
                 'titulo', 
                 'localizacao', 
@@ -65,7 +81,10 @@ if(isset($_GET['apicall'])){
                 'tipo_contrato',
                 'area_atuacao',
                 'id_empresa',
-                'beneficios'  // obrigatório
+                'beneficios',
+                'nivel_experiencia',
+                'habilidades_desejaveis',
+                'ramo'
             ));
             
             try {
@@ -80,77 +99,53 @@ if(isset($_GET['apicall'])){
                     $_POST['tipo_contrato'],
                     $_POST['area_atuacao'],
                     $_POST['id_empresa'],
-                    $_POST['beneficios']
+                    $_POST['beneficios'],
+                    $_POST['nivel_experiencia'],
+                    $_POST['habilidades_desejaveis'],
+                    $_POST['ramo']
                 );
                 
-                if($result['error']) {
-                    $response = [
-                        'error' => true,
-                        'message' => $result['message'],
-                        'sql_error' => $result['sql_error'] ?? null
-                    ];
-                } else {
-                    $response = [
-                        'error' => false,
-                        'message' => $result['message'],
-                        'id_vaga' => $result['id_vaga'],
-                        'affected_rows' => $result['affected_rows']
-                    ];
-                }
+                $response = $result;
                 
             } catch (Exception $e) {
-                $response = [
+                $response = array(
                     'error' => true,
                     'message' => 'Erro no processamento: ' . $e->getMessage(),
                     'debug' => (defined('ENVIRONMENT') && ENVIRONMENT === 'development') ? $e->getTraceAsString() : null
-                ];
+                );
+            }
+            break;
+
+        case 'excluirVaga':
+            if (!isset($_POST['id_vaga']) || empty($_POST['id_vaga'])) {
+                $response = array(
+                    'error' => true,
+                    'message' => 'Parâmetro id_vaga é obrigatório'
+                );
+                break;
+            }
+
+            try {
+                $db = new DbOperation();
+                $result = $db->excluirVagas(intval($_POST['id_vaga']));
+                $response = $result;
+                
+            } catch (Exception $e) {
+                $response = array(
+                    'error' => true,
+                    'message' => 'Erro no processamento: ' . $e->getMessage()
+                );
             }
             break;
 
         default:
-            $response['error'] = true; 
-            $response['message'] = 'Chamada de API inválida';
-            break;
-
-            case 'excluirVaga':
-    isTheseParametersAvailable(array('id_vaga'));
-    
-    try {
-        $db = new DbOperation();
-        
-        $result = $db->excluirVagas($_POST['id_vaga']);
-        
-        if($result['error']) {
-            $response = [
+            $response = array(
                 'error' => true,
-                'message' => $result['message'],
-                'sql_error' => $result['sql_error'] ?? null
-            ];
-        } else {
-            $response = [
-                'error' => false,
-                'message' => $result['message'],
-                'affected_rows' => $result['affected_rows']
-            ];
-        }
-        
-    } catch (Exception $e) {
-        $response = [
-            'error' => true,
-            'message' => 'Erro no processamento: ' . $e->getMessage(),
-            'debug' => (defined('ENVIRONMENT') && ENVIRONMENT === 'development') ? $e->getTraceAsString() : null
-        ];
+                'message' => 'Operação não implementada'
+            );
     }
-    break;
-
-
-
-
-
-    }
-} else {
-    $response['error'] = true; 
-    $response['message'] = 'Chamada de API não especificada';
 }
 
-echo json_encode($response);
+// Enviar resposta
+echo json_encode($response, JSON_UNESCAPED_UNICODE);
+?>

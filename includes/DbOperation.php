@@ -11,104 +11,138 @@ class DbOperation
         $this->con = $db->connect();
     }
 
-    // visualizar vagas
+    // Visualizar vagas (atualizado com novos campos)
     function getVagas() {
-    $stmt = $this->con->prepare("
-        SELECT 
-            v.id_vagas, 
-            v.titulo_vagas, 
-            v.local_vagas, 
-            v.descricao_vagas, 
-            v.requisitos_vagas, 
-            v.salario_vagas, 
-            v.vinculo_vagas, 
-            v.ramo_vagas, 
-            v.beneficios_vagas, 
-            v.id_empresa,
-            e.nome_empresa
-        FROM 
-            vagas v
-        LEFT JOIN 
-            empresa e ON v.id_empresa = e.id_empresa
-    ");
+        $stmt = $this->con->prepare("
+            SELECT 
+                v.id_vagas, 
+                v.titulo_vagas, 
+                v.local_vagas, 
+                v.descricao_vagas, 
+                v.requisitos_vagas, 
+                v.salario_vagas, 
+                v.vinculo_vagas, 
+                v.ramo_vagas, 
+                v.beneficios_vagas,
+                v.nivel_experiencia,
+                v.tipo_contrato,
+                v.area_atuacao,
+                v.habilidades_desejaveis,
+                v.id_empresa,
+                e.nome_empresa
+            FROM 
+                vagas v
+            LEFT JOIN 
+                empresa e ON v.id_empresa = e.id_empresa
+        ");
 
-    if (!$stmt) {
-        die("Erro na preparação da query: " . $this->con->error);
+        if (!$stmt) {
+            die("Erro na preparação da query: " . $this->con->error);
+        }
+
+        $stmt->execute();
+        $stmt->bind_result(
+            $id_vagas, 
+            $titulo_vagas, 
+            $local_vagas, 
+            $descricao_vagas, 
+            $requisitos_vagas, 
+            $salario_vagas, 
+            $vinculo_vagas, 
+            $ramo_vagas, 
+            $beneficios_vagas,
+            $nivel_experiencia,
+            $tipo_contrato,
+            $area_atuacao,
+            $habilidades_desejaveis,
+            $id_empresa,
+            $nome_empresa
+        );
+
+        $tbVagas = array();
+        while ($stmt->fetch()) {
+            $vaga = array();
+            $vaga['id_vagas'] = $id_vagas;
+            $vaga['titulo_vagas'] = $titulo_vagas;
+            $vaga['local_vagas'] = $local_vagas;
+            $vaga['descricao_vagas'] = $descricao_vagas;
+            $vaga['requisitos_vagas'] = $requisitos_vagas;
+            $vaga['salario_vagas'] = $salario_vagas;
+            $vaga['vinculo_vagas'] = $vinculo_vagas;
+            $vaga['ramo_vagas'] = $ramo_vagas;
+            $vaga['beneficios_vagas'] = $beneficios_vagas;
+            $vaga['nivel_experiencia'] = $nivel_experiencia;
+            $vaga['tipo_contrato'] = $tipo_contrato;
+            $vaga['area_atuacao'] = $area_atuacao;
+            $vaga['habilidades_desejaveis'] = $habilidades_desejaveis;
+            $vaga['id_empresa'] = $id_empresa;
+            $vaga['nome_empresa'] = $nome_empresa;
+            array_push($tbVagas, $vaga);
+        }
+        $stmt->close();
+        return $tbVagas;
     }
 
-    $stmt->execute();
-    $stmt->bind_result(
-        $id_vagas, 
-        $titulo_vagas, 
-        $local_vagas, 
-        $descricao_vagas, 
-        $requisitos_vagas, 
-        $salario_vagas, 
-        $vinculo_vagas, 
-        $ramo_vagas, 
-        $beneficios_vagas, 
-        $id_empresa,
-        $nome_empresa
-    );
-
-    $tbVagas = array();
-    while ($stmt->fetch()) {
-        $vaga = array();
-        $vaga['id_vagas'] = $id_vagas;
-        $vaga['titulo_vagas'] = $titulo_vagas;
-        $vaga['local_vagas'] = $local_vagas;
-        $vaga['descricao_vagas'] = $descricao_vagas;
-        $vaga['requisitos_vagas'] = $requisitos_vagas;
-        $vaga['salario_vagas'] = $salario_vagas;
-        $vaga['vinculo_vagas'] = $vinculo_vagas;
-        $vaga['ramo_vagas'] = $ramo_vagas;
-        $vaga['beneficios_vagas'] = $beneficios_vagas;
-        $vaga['id_empresa'] = $id_empresa;
-        $vaga['nome_empresa'] = $nome_empresa;  // nome da empresa incluído no JSON
-        array_push($tbVagas, $vaga);
-    }
-    $stmt->close();
-    return $tbVagas;
-}
-
-// cadastrar vagas
-function cadastrarVagas($titulo, $localizacao, $descricao, $requisitos, $salario, $tipo_contrato, $area_atuacao, $id_empresa, $beneficios) {
+// Cadastrar vagas (atualizado com novos campos)
+    function cadastrarVagas($titulo, $localizacao, $descricao, $requisitos, $salario, 
+                      $tipo_contrato, $area_atuacao, $id_empresa, $beneficios,
+                      $nivel_experiencia, $habilidades_desejaveis, $ramo) {
+    
+    // Initialize response array
+    $response = ['error' => true, 'message' => 'Unknown error occurred'];
+    
     try {
+        // Validate required fields
+        if (empty($titulo) || empty($id_empresa)) {
+            throw new Exception('Título e ID da empresa são obrigatórios');
+        }
+
         $stmt = $this->con->prepare("INSERT INTO vagas (
             titulo_vagas, 
             local_vagas, 
             descricao_vagas, 
             requisitos_vagas, 
             salario_vagas, 
-            vinculo_vagas, 
-            ramo_vagas, 
+            tipo_contrato, 
+            area_atuacao, 
             id_empresa,
             beneficios_vagas,
+            nivel_experiencia,
+            habilidades_desejaveis,
+            ramo_vagas,
             id_candidato
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)");
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)");
 
         if (!$stmt) {
             throw new Exception('Erro na preparação: ' . $this->con->error);
         }
 
-        $stmt->bind_param("sssssssis", 
-    $titulo,
-    $localizacao,
-    $descricao,
-    $requisitos,
-    $salario,
-    $tipo_contrato,
-    $area_atuacao,
-    $id_empresa,
-    $beneficios
-);
+        $bindResult = $stmt->bind_param("ssssssssssss", 
+            $titulo,
+            $localizacao,
+            $descricao,
+            $requisitos,
+            $salario,
+            $tipo_contrato,
+            $area_atuacao,
+            $id_empresa,
+            $beneficios,
+            $nivel_experiencia,
+            $habilidades_desejaveis,
+            $ramo
+        );
 
+        if (!$bindResult) {
+            throw new Exception('Erro ao vincular parâmetros: ' . $stmt->error);
+        }
 
-        if (!$stmt->execute()) {
+        $executeResult = $stmt->execute();
+        
+        if (!$executeResult) {
             throw new Exception('Erro na execução: ' . $stmt->error);
         }
 
-        return [
+        $response = [
             'error' => false,
             'message' => 'Vaga cadastrada com sucesso',
             'id_vaga' => $stmt->insert_id,
@@ -116,12 +150,17 @@ function cadastrarVagas($titulo, $localizacao, $descricao, $requisitos, $salario
         ];
 
     } catch (Exception $e) {
-        return [
+        $response = [
             'error' => true,
             'message' => $e->getMessage(),
             'sql_error' => $this->con->error ?? null
         ];
     }
+    
+    // Ensure no output before this
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit();
 }
 
 // excluir vagas

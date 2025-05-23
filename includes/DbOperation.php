@@ -87,68 +87,35 @@ class DbOperation
     function cadastrarVagas($titulo, $localizacao, $descricao, $requisitos, $salario, 
                       $tipo_contrato, $area_atuacao, $id_empresa, $beneficios,
                       $nivel_experiencia, $habilidades_desejaveis, $ramo) {
-    
-    // Initialize response array
     $response = ['error' => true, 'message' => 'Unknown error occurred'];
-    
     try {
-        // Validate required fields
         if (empty($titulo) || empty($id_empresa)) {
             throw new Exception('Título e ID da empresa são obrigatórios');
         }
-
         $stmt = $this->con->prepare("INSERT INTO vagas (
-            titulo_vagas, 
-            local_vagas, 
-            descricao_vagas, 
-            requisitos_vagas, 
-            salario_vagas, 
-            tipo_contrato, 
-            area_atuacao, 
-            id_empresa,
-            beneficios_vagas,
-            nivel_experiencia,
-            habilidades_desejaveis,
-            ramo_vagas,
-            id_candidato
+            titulo_vagas, local_vagas, descricao_vagas, requisitos_vagas, salario_vagas, tipo_contrato, area_atuacao, id_empresa,
+            beneficios_vagas, nivel_experiencia, habilidades_desejaveis, ramo_vagas, id_candidato
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)");
-
         if (!$stmt) {
             throw new Exception('Erro na preparação: ' . $this->con->error);
         }
-
         $bindResult = $stmt->bind_param("ssssssssssss", 
-            $titulo,
-            $localizacao,
-            $descricao,
-            $requisitos,
-            $salario,
-            $tipo_contrato,
-            $area_atuacao,
-            $id_empresa,
-            $beneficios,
-            $nivel_experiencia,
-            $habilidades_desejaveis,
-            $ramo
+            $titulo, $localizacao, $descricao, $requisitos, $salario, $tipo_contrato, $area_atuacao, $id_empresa,
+            $beneficios, $nivel_experiencia, $habilidades_desejaveis, $ramo
         );
-
         if (!$bindResult) {
             throw new Exception('Erro ao vincular parâmetros: ' . $stmt->error);
         }
-
         $executeResult = $stmt->execute();
-        
         if (!$executeResult) {
             throw new Exception('Erro na execução: ' . $stmt->error);
         }
-
         $response = [
             'error' => false,
             'message' => 'Vaga cadastrada com sucesso',
             'id_vaga' => $stmt->insert_id,
             'affected_rows' => $stmt->affected_rows
         ];
-
     } catch (Exception $e) {
         $response = [
             'error' => true,
@@ -156,12 +123,9 @@ class DbOperation
             'sql_error' => $this->con->error ?? null
         ];
     }
-    
-    // Ensure no output before this
-    header('Content-Type: application/json');
-    echo json_encode($response);
-    exit();
+    return $response;
 }
+
 
 // excluir vagas
 function excluirVagas($id_vaga) {

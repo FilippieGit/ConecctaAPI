@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 23/05/2025 às 23:01
+-- Tempo de geração: 27/05/2025 às 03:15
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -147,7 +147,37 @@ INSERT INTO `vagas` (`id_vagas`, `id_empresa`, `id_candidato`, `titulo_vagas`, `
 (113, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', NULL, NULL, NULL, 5000.00, 'CLT', '6', NULL, 'TI'),
 (114, 1, NULL, 'a', 'a', '11', 'a', NULL, NULL, NULL, 111.00, 'CLT', 'aaa', NULL, 'Tecnologia da Informação'),
 (115, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Júnior', 'CLT', 'Desenvolvimento Mobile', 5000.00, NULL, 'VT, VR, Plano de saúde', 'Experiência com arquitetura MVVM', 'Tecnologia'),
-(116, 1, NULL, 'teste', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Júnior', 'CLT', 'Desenvolvimento Mobile', 5000.00, NULL, 'VT, VR, Plano de saúde', 'Experiência com arquitetura MVVM', 'Tecnologia');
+(116, 1, NULL, 'teste', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Júnior', 'CLT', 'Desenvolvimento Mobile', 5000.00, NULL, 'VT, VR, Plano de saúde', 'Experiência com arquitetura MVVM', 'Tecnologia'),
+(117, 2, NULL, 'Desenvolvedor Java Pleno', 'Vaga para o Rio de Janeiro, experiência em Java. Contratação PJ, home office e seguro saúde. Salário de R$ 4.200,00. Área de Desenvolvimento.', 'Rio de Janeiro', 'Experiência em Java', 'Não informado', 'Não informado', 'Não informado', 4200.00, 'PJ', 'Home office, Seguro saúde', 'Não informado', 'Desenvolvimento'),
+(118, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Não informado', 'Não informado', 'Não informado', 5000.00, 'CLT', 'Não informado', 'Não informado', 'TI'),
+(119, 1, NULL, 'tdte', 'ete', 'tet', '21', 'Não informado', 'Não informado', 'Não informado', 1.00, 'CLT', 'Não informado', 'Não informado', 'Tecnologia da Informação'),
+(120, 1, NULL, 'a', 'a', '1', '1', 'Não informado', 'Não informado', 'Não informado', 1.00, 'CLT', 'Não informado', 'Não informado', 'Tecnologia da Informação'),
+(121, 1, NULL, '11BC', '1', '11', '1', 'Não informado', 'Não informado', 'Não informado', 111.00, 'CLT', 'Não informado', 'Não informado', 'Tecnologia da Informação'),
+(122, 1, NULL, '999', '999', '9', '9', 'Não informado', 'Não informado', 'Não informado', 999.00, 'CLT', 'Não informado', 'Não informado', 'Tecnologia da Informação'),
+(123, 1, NULL, '888', '888', '888', '88', 'Não informado', 'Não informado', 'Não informado', 888.00, 'CLT', 'Não informado', 'Não informado', 'Tecnologia da Informação'),
+(124, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Não informado', 'Não informado', 'Não informado', 5000.00, 'CLT', 'AA', 'Não informado', 'TI'),
+(125, 1, NULL, '777', '777', '777', '77', 'Não informado', 'Não informado', 'Não informado', 77.00, 'CLT', '7', 'Não informado', 'Tecnologia da Informação'),
+(126, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Não informado', 'Não informado', 'Não informado', 5000.00, 'CLT', 'eeeeee', 'Não informado', 'TI'),
+(127, 1, NULL, 'oi', 'oi', 'oi', 'oi', 'Não informado', 'Não informado', 'Não informado', 11.00, 'CLT', 'oi', 'Não informado', 'Tecnologia da Informação'),
+(128, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Não informado', 'Não informado', 'Não informado', 5000.00, 'CLT', '6', 'Não informado', 'TI'),
+(129, 1, NULL, 'a', 'a', '11', 'a', 'Não informado', 'Não informado', 'Não informado', 111.00, 'CLT', 'aaa', 'Não informado', 'Tecnologia da Informação'),
+(130, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Júnior', 'CLT', 'Desenvolvimento Mobile', 5000.00, 'Não informado', 'VT, VR, Plano de saúde', 'Experiência com arquitetura MVVM', 'Tecnologia'),
+(131, 1, NULL, 'teste', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Júnior', 'CLT', 'Desenvolvimento Mobile', 5000.00, 'Não informado', 'VT, VR, Plano de saúde', 'Experiência com arquitetura MVVM', 'Tecnologia'),
+(132, 2, NULL, 'Desenvolvedor Java Pleno', 'Vaga para o Rio de Janeiro, experiência em Java. Contratação PJ, home office e seguro saúde. Salário de R$ 4.200,00. Área de Desenvolvimento.', 'Rio de Janeiro', 'Experiência em Java', 'Pleno', 'PJ', 'Desenvolvimento de Software', 4200.00, 'PJ', 'Home office, Seguro saúde', 'Conhecimento em Spring e Hibernate', 'Desenvolvimento'),
+(133, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Pleno', 'CLT', 'Desenvolvimento Mobile', 5000.00, 'CLT', 'Vale Transporte, Vale Refeição', 'Experiência com MVVM e testes unitários', 'TI'),
+(134, 1, NULL, 'tdte', 'ete', 'tet', '21', 'Júnior', 'CLT', 'Tecnologia da Informação', 1.00, 'CLT', 'Vale Transporte', 'Conhecimento básico em desenvolvimento', 'Tecnologia da Informação'),
+(135, 1, NULL, 'a', 'a', '1', '1', 'Júnior', 'CLT', 'Tecnologia da Informação', 1.00, 'CLT', 'Vale Refeição', 'Noções básicas de programação', 'Tecnologia da Informação'),
+(136, 1, NULL, '11BC', '1', '11', '1', 'Júnior', 'CLT', 'Tecnologia da Informação', 111.00, 'CLT', 'Plano de saúde', 'Conhecimento em linguagens básicas', 'Tecnologia da Informação'),
+(137, 1, NULL, '999', '999', '9', '9', 'Júnior', 'CLT', 'Tecnologia da Informação', 999.00, 'CLT', 'Vale Transporte', 'Conhecimento em sistemas legados', 'Tecnologia da Informação'),
+(138, 1, NULL, '888', '888', '888', '88', 'Júnior', 'CLT', 'Tecnologia da Informação', 888.00, 'CLT', 'Vale Refeição', 'Conhecimento em suporte técnico', 'Tecnologia da Informação'),
+(139, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Pleno', 'CLT', 'Desenvolvimento Mobile', 5000.00, 'CLT', 'AA', 'Experiência com Android Jetpack', 'TI'),
+(140, 1, NULL, '777', '777', '777', '77', 'Pleno', 'CLT', 'Tecnologia da Informação', 77.00, 'CLT', '7', 'Conhecimento em manutenção de software', 'Tecnologia da Informação'),
+(141, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Pleno', 'CLT', 'Desenvolvimento Mobile', 5000.00, 'CLT', 'eeeeee', 'Experiência com Kotlin Coroutines', 'TI'),
+(142, 1, NULL, 'oi', 'oi', 'oi', 'oi', 'Júnior', 'CLT', 'Tecnologia da Informação', 11.00, 'CLT', 'oi', 'Conhecimento básico em desenvolvimento mobile', 'Tecnologia da Informação'),
+(143, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Pleno', 'CLT', 'Desenvolvimento Mobile', 5000.00, 'CLT', '6', 'Experiência com testes automatizados', 'TI'),
+(144, 1, NULL, 'a', 'a', '11', 'a', 'Júnior', 'CLT', 'Tecnologia da Informação', 111.00, 'CLT', 'aaa', 'Conhecimento em desenvolvimento web', 'Tecnologia da Informação'),
+(145, 1, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Júnior', 'CLT', 'Desenvolvimento Mobile', 5000.00, 'CLT', 'VT, VR, Plano de saúde', 'Experiência com arquitetura MVVM', 'Tecnologia'),
+(146, 1, NULL, 'teste', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 'Júnior', 'CLT', 'Desenvolvimento Mobile', 5000.00, 'CLT', 'VT, VR, Plano de saúde', 'Experiência com arquitetura MVVM', 'Tecnologia');
 
 --
 -- Índices para tabelas despejadas
@@ -206,7 +236,7 @@ ALTER TABLE `empresa`
 -- AUTO_INCREMENT de tabela `vagas`
 --
 ALTER TABLE `vagas`
-  MODIFY `id_vagas` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
+  MODIFY `id_vagas` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=147;
 
 --
 -- Restrições para tabelas despejadas

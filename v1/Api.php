@@ -73,10 +73,10 @@ try {
             }
             
             $requiredParams = [
-                'titulo', 'localizacao', 'descricao', 'requisitos',
-                'salario', 'tipo_contrato', 'area_atuacao', 'id_empresa',
-                'beneficios', 'nivel_experiencia', 'habilidades_desejaveis', 'ramo'
-            ];
+    'titulo', 'localizacao', 'descricao', 'requisitos',
+    'salario', 'tipo_contrato', 'area_atuacao', 'id_empresa',
+    'beneficios', 'nivel_experiencia', 'habilidades_desejaveis', 'ramo'
+];
             validateParameters($requiredParams);
             
             $response = $db->cadastrarVagas(

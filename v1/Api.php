@@ -95,6 +95,148 @@ try {
             );
             break;
 
+
+            case 'verificarCandidatura':
+        validateParameters(['user_id', 'vaga_id'], 'GET');
+        $response = [
+            'ja_candidatado' => $db->verificarCandidatura($_GET['user_id'], (int)$_GET['vaga_id'])
+        ];
+        break;
+
+    case 'candidatarVaga':
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['error' => true, 'message' => 'Método POST requerido']);
+        exit();
+    }
+
+    parse_str(file_get_contents("php://input"), $postData);
+
+    if (!isset($postData['user_id']) || !isset($postData['vaga_id'])) {
+        http_response_code(400);
+        echo json_encode(['error' => true, 'message' => 'Parâmetros user_id e vaga_id são obrigatórios']);
+        exit();
+    }
+
+    $firebase_uid = $postData['user_id']; // <- esse é o UID vindo do Firebase
+    $vaga_id = (int)$postData['vaga_id'];
+    $respostas = isset($postData['respostas']) ? $postData['respostas'] : null;
+
+    // Validar se respostas é JSON válido (opcional)
+    if ($respostas !== null) {
+        json_decode($respostas);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            http_response_code(400);
+            echo json_encode(['error' => true, 'message' => 'Formato das respostas inválido']);
+            exit();
+        }
+    }
+
+    // Chama a função passando o UID do Firebase
+    $response = $db->candidatarVaga($firebase_uid, $vaga_id, $respostas);
+
+    // Código de retorno
+    http_response_code(isset($response['code']) ? $response['code'] : ($response['error'] ? 500 : 200));
+    echo json_encode($response);
+    break;
+
+
+
+    case 'getUserByFirebaseUid':
+    if (!isset($_GET['uid'])) {
+        http_response_code(400);
+        echo json_encode(['error' => true, 'message' => 'UID do Firebase é obrigatório']);
+        exit();
+    }
+    
+    $stmt = $con->prepare("SELECT id FROM usuarios WHERE firebase_uid = ?");
+    $stmt->bind_param("s", $_GET['uid']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        echo json_encode(['error' => false, 'id' => $user['id']]);
+    } else {
+        echo json_encode(['error' => true, 'message' => 'Usuário não encontrado']);
+    }
+    break;
+
+    case 'listarCandidaturas':
+    if (!isset($_GET['vaga_id'])) {
+        http_response_code(400);
+        echo json_encode([
+            'error' => true,
+            'message' => 'Parâmetro vaga_id é obrigatório'
+        ]);
+        exit();
+    }
+    
+    $vaga_id = (int)$_GET['vaga_id'];
+    $response = $db->listarCandidatosPorVaga($vaga_id);
+    
+    // Se houver erro, retorna código 500
+    if ($response['error']) {
+        http_response_code(500);
+    }
+    
+    echo json_encode($response);
+    break;
+
+    case 'listarCandidaturas':
+    if (!isset($_GET['vaga_id'])) {
+        http_response_code(400);
+        echo json_encode(['error' => true, 'message' => 'Parâmetro vaga_id é obrigatório']);
+        exit();
+    }
+    
+    $vaga_id = (int)$_GET['vaga_id'];
+    $stmt = $con->prepare("
+        SELECT 
+            u.id, 
+            u.nome, 
+            u.email,
+            u.setor as cargo,
+            c.data_candidatura,
+            c.status
+        FROM 
+            candidaturas c
+        JOIN 
+            usuarios u ON c.user_id = u.id
+        WHERE 
+            c.vaga_id = ?
+        ORDER BY 
+            c.data_candidatura DESC
+    ");
+    $stmt->bind_param("i", $vaga_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $candidatos = array();
+    while ($row = $result->fetch_assoc()) {
+        $candidatos[] = $row;
+    }
+    
+    echo json_encode([
+        'error' => false,
+        'candidatos' => $candidatos,
+        'count' => count($candidatos)
+    ]);
+    break;
+
+    case 'atualizarStatusCandidatura':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            throw new Exception('Método POST requerido');
+        }
+        
+        validateParameters(['id_candidatura', 'status']);
+        $response = $db->atualizarStatusCandidatura(
+            (int)$_POST['id_candidatura'],
+            $_POST['status']
+        );
+        break;
+
         case 'excluirVaga':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);

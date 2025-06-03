@@ -62,38 +62,40 @@ try {
     
     switch ($_GET['apicall']) {
         case 'getVagas':
-            $response['vagas'] = $db->getVagas();
-            $response['count'] = count($response['vagas']);
-            break;
+    $response['vagas'] = $db->getVagas();
+    $response['count'] = count($response['vagas']);
+    break;
 
-        case 'cadastrarVaga':
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                http_response_code(405);
-                throw new Exception('Método POST requerido');
-            }
-            
-            $requiredParams = [
-    'titulo', 'localizacao', 'descricao', 'requisitos',
-    'salario', 'tipo_contrato', 'area_atuacao', 'id_empresa',
-    'beneficios', 'nivel_experiencia', 'habilidades_desejaveis', 'ramo'
-];
-            validateParameters($requiredParams);
-            
-            $response = $db->cadastrarVagas(
-                $_POST['titulo'],
-                $_POST['localizacao'],
-                $_POST['descricao'],
-                $_POST['requisitos'],
-                $_POST['salario'],
-                $_POST['tipo_contrato'],
-                $_POST['area_atuacao'],
-                $_POST['id_empresa'],
-                $_POST['beneficios'],
-                $_POST['nivel_experiencia'],
-                $_POST['habilidades_desejaveis'],
-                $_POST['ramo']
-            );
-            break;
+
+        case 'cadastrarVaga':   
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        throw new Exception('Método POST requerido');
+    }
+
+    $requiredParams = [
+        'titulo', 'localizacao', 'descricao', 'requisitos',
+        'salario', 'tipo_contrato', 'area_atuacao', 'id_usuario',
+        'beneficios', 'nivel_experiencia', 'habilidades_desejaveis', 'ramo'
+    ];
+    validateParameters($requiredParams);
+
+    $response = $db->cadastrarVagas(
+        $_POST['titulo'],
+        $_POST['localizacao'],
+        $_POST['descricao'],
+        $_POST['requisitos'],
+        $_POST['salario'],
+        $_POST['tipo_contrato'],
+        $_POST['area_atuacao'],
+        $_POST['id_usuario'],
+        $_POST['beneficios'],
+        $_POST['nivel_experiencia'],
+        $_POST['habilidades_desejaveis'],
+        $_POST['ramo']
+    );
+    break;
+
 
 
             case 'verificarCandidatura':

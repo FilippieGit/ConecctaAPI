@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 05/06/2025 às 04:29
+-- Tempo de geração: 06/06/2025 às 07:53
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -75,17 +75,18 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `firebase_uid`, `nome`, `username`, `genero`, `idade`, `telefone`, `email`, `setor`, `descricao`, `experiencia_profissional`, `formacao_academica`, `certificados`, `imagem_perfil`, `tipo`, `CNPJ`, `website`) VALUES
-(2, 'azHGeFjqcFXsRtdt3Xo2s3iC7Cd2', 'Felip', '', '', 0, '(11) 9 96874-3108', 'lulafelipe7@gmail.com', 'Teste', 'Teste', 'teste na teste\'corp (atual, teste)\ntestar', 'TCC - ETEC (2025–2025)\nZica', 'AWS azure rsrs - Google cloud (2025)', '', NULL, NULL, NULL),
+(2, '2IpuGWWdVYSO7f4Qm6VdU2JIwDR2', 'Felipe Lula', 'lulafelipe7', '', NULL, '', 'lulafelipe7@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', '', ''),
 (4, 'Zz3B0U6OvkOOzcQPxFisRDMfGkx1', 'Teste', 'Felipethums07', '', NULL, '', '0', '', '', '[]', '[]', '[]', '', NULL, NULL, NULL),
 (23, 'ca0vzfwcNaaCszxd3uCnQLu5dta2', 'Felipe Lula', 'lulagadogurilla', '', NULL, '', 'lulagadogurilla@gmail.com', 'rsrs', '', '', '', '', '', NULL, NULL, NULL),
-(24, '0sVlhrtotrWxja0m2WoDS6fGFZ03', '123', 'reservac31', '', NULL, '', 'reservac31@gmail.com', '', '', '[]', '[]', '[]', '', NULL, NULL, NULL),
-(25, 'KbyMIcN2iidShIeQQuE9zMufiaQ2', '123', 'reservac32', '', NULL, '', 'reservac32@gmail.com', '', '', '[]', '[]', '[]', '', NULL, NULL, NULL),
+(24, 'ayJU8fpgcPc0sK1qY7KSPsXShJ32', 'Filippie Amaral', 'reservac31', '', NULL, '', 'reservac31@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', '', ''),
+(25, 'Yp8AlhokRyN5JVFjZ5Rc9Z05n0S2', 'TechSolutions LTDA.', 'reservac32', '', NULL, '', 'reservac32@gmail.com', '', '', '[]', '[]', '[]', '', 'Jurídica', '123123123122311', 'TechSolutions.com.br'),
 (26, 'WJshVxy4RQPiBHG16Kaq8iVD8dn1', 'Gustavo', 'gustavopthums', '', NULL, '', 'gustavopthums@gmail.com', '', '', '[]', '[]', '[]', '', NULL, NULL, NULL),
 (28, 'xgjkhJ9P8fO9jRf8apXBZ0rbN5j1', 'Matheus', 'zorkynanyomae', '', NULL, '', 'zorkynanyomae@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', NULL, NULL),
-(29, 'QE7kkoYbypdj74KukV8kbJ0RCzV2', 'teste', 'lulacssbuy13', '', NULL, '', 'lulacssbuy13@gmail.com', '', '', '[]', '[]', '[]', '', 'Jurídica', '777-9999-8989', '123.com');
+(29, 'QE7kkoYbypdj74KukV8kbJ0RCzV2', 'teste', 'lulacssbuy13', '', NULL, '', 'lulacssbuy13@gmail.com', '', '', '[]', '[]', '[]', '', 'Jurídica', '777-9999-8989', '123.com'),
+(30, 'FvdQNhiFapY1XQCC7YeoyGzOe9s2', '1231', 'filippieamaral', '', NULL, '', 'filippieamaral@gmail.com', '', '', '[]', '[]', '[]', '', 'Jurídica', '213', '213213'),
+(31, 'gBCXwrfl1zNNYThLI6LL7laUjLj1', '123123', 'filippielindoo', '', NULL, '', 'filippielindoo@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', '', '');
 
 -- --------------------------------------------------------
-
 
 --
 -- Estrutura para tabela `vagas`
@@ -114,7 +115,7 @@ CREATE TABLE `vagas` (
 --
 
 INSERT INTO `vagas` (`id_vagas`, `id_usuario`, `id_candidato`, `titulo_vagas`, `descricao_vagas`, `local_vagas`, `requisitos_vagas`, `salario_vagas`, `vinculo_vagas`, `beneficios_vagas`, `ramo_vagas`, `nivel_experiencia`, `tipo_contrato`, `area_atuacao`, `habilidades_desejaveis`) VALUES
-(41, 2, 3, 'Desenvolvedor PHP e MySQL', 'Atuação em São Paulo com foco em desenvolvimento PHP e MySQL. Necessário conhecimento nas tecnologias citadas. Salário de R$ 3.500,00, CLT, benefícios de vale transporte e vale refeição. Área de Tecnologia.', 'São Paulo', 'Conhecimento em PHP e MySQL', 3500.00, 'CLT', 'Vale transporte, Vale refeição', 'Tecnologia', NULL, NULL, NULL, NULL),
+(41, 25, 3, 'Desenvolvedor PHP e MySQL', 'Atuação em São Paulo com foco em desenvolvimento PHP e MySQL. Necessário conhecimento nas tecnologias citadas. Salário de R$ 3.500,00, CLT, benefícios de vale transporte e vale refeição. Área de Tecnologia.', 'São Paulo', 'Conhecimento em PHP e MySQL', 3500.00, 'CLT', 'Vale transporte, Vale refeição', 'Tecnologia', NULL, NULL, NULL, NULL),
 (42, 2, 2, 'Desenvolvedor Java Pleno', 'Vaga para o Rio de Janeiro, experiência em Java. Contratação PJ, home office e seguro saúde. Salário de R$ 4.200,00. Área de Desenvolvimento.', 'Rio de Janeiro', 'Experiência em Java', 4200.00, 'PJ', 'Home office, Seguro saúde', 'Desenvolvimento', NULL, NULL, NULL, NULL),
 (63, 2, 1, 'Full Stack PHP/JavaScript', 'Oportunidade em São Paulo para desenvolvedor com conhecimentos em PHP, MySQL e JavaScript. Salário de R$ 4.000,00, CLT, benefícios de vale transporte e vale refeição. Área de Tecnologia.', 'São Paulo', 'PHP, MySQL, JavaScript', 4000.00, 'CLT', 'Vale transporte, Vale refeição', 'Tecnologia', NULL, NULL, NULL, NULL),
 (64, 2, 2, 'Desenvolvedor Java com Spring', 'Atuação no Rio de Janeiro, experiência em Java, Spring e SQL. Contratação PJ, home office e plano de saúde. Salário de R$ 4.500,00. Área de Desenvolvimento.', 'Rio de Janeiro', 'Java, Spring, SQL', 4500.00, 'PJ', 'Home office, Plano de saúde', 'Desenvolvimento', NULL, NULL, NULL, NULL),
@@ -133,12 +134,14 @@ INSERT INTO `vagas` (`id_vagas`, `id_usuario`, `id_candidato`, `titulo_vagas`, `
 (89, 2, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 5000.00, 'CLT', NULL, 'TI', NULL, NULL, NULL, NULL),
 (90, 2, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 5000.00, 'CLT', NULL, 'TI', NULL, NULL, NULL, NULL),
 (91, 2, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 5000.00, 'CLT', NULL, 'TI', NULL, NULL, NULL, NULL),
-(92, 2, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 5000.00, 'CLT', NULL, 'TI', NULL, NULL, NULL, NULL),
-(105, 2, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 5000.00, NULL, 'VT, VR, Plano de saúde', 'Tecnologia', 'Júnior', 'CLT', 'Desenvolvimento Mobile', 'Experiência com arquitetura MVVM'),
-(107, 23, NULL, 'OPA', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 5000.00, NULL, 'VT, VR, Plano de saúde', 'Tecnologia', 'Júnior', 'CLT', 'Desenvolvimento Mobile', 'Experiência com arquitetura MVVM'),
-(108, 23, NULL, 'oi', 'oi', 'oi', 'oi', 111.00, NULL, 'oi', 'oi', 'Pleno', 'CLT', 'oi', 'oi'),
-(109, 23, NULL, 'teste', 'teste', 'teste', 'teste', 123123.00, NULL, 'teste', 'teste', 'Pleno', 'Estágio', 'teste', 'teste'),
-(110, 23, NULL, 'oioi', 'oi', 'oi', 'oi', 0.00, NULL, 'oi', 'oi', 'Júnior', 'PJ', 'ioi', 'oioi');
+(92, 25, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 5000.00, 'CLT', NULL, 'TI', NULL, NULL, NULL, NULL),
+(105, 25, NULL, 'Desenvolvedor Android', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 5000.00, NULL, 'VT, VR, Plano de saúde', 'Tecnologia', 'Júnior', 'CLT', 'Desenvolvimento Mobile', 'Experiência com arquitetura MVVM'),
+(107, 25, NULL, 'OPA', 'Desenvolver aplicativos móveis com Kotlin', 'Remoto', 'Kotlin, Java, Android SDK', 5000.00, NULL, 'VT, VR, Plano de saúde', 'Tecnologia', 'Júnior', 'CLT', 'Desenvolvimento Mobile', 'Experiência com arquitetura MVVM'),
+(108, 25, NULL, 'oi', 'oi', 'oi', 'oi', 111.00, NULL, 'oi', 'oi', 'Pleno', 'CLT', 'oi', 'oi'),
+(109, 25, NULL, 'teste', 'teste', 'teste', 'teste', 123123.00, NULL, 'teste', 'teste', 'Pleno', 'Estágio', 'teste', 'teste'),
+(110, 25, NULL, 'oioi', 'oi', 'oi', 'oi', 0.00, NULL, 'oi', 'oi', 'Júnior', 'PJ', 'ioi', 'oioi'),
+(111, 25, NULL, 'ji', 'ji', 'ji', 'ji', 1111.00, NULL, 'ji', 'Tecnologia', 'Júnior', 'CLT', 'Tecnologia da Informação', 'Android SDK'),
+(112, 30, NULL, 'jiji', 'jiji', 'jiji', 'jiiji', 123123.00, NULL, 'ji', 'Tecnologia', 'Júnior', 'CLT', 'Tecnologia da Informação', 'Kotlin');
 
 --
 -- Índices para tabelas despejadas
@@ -184,13 +187,13 @@ ALTER TABLE `candidaturas`
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT de tabela `vagas`
 --
 ALTER TABLE `vagas`
-  MODIFY `id_vagas` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
+  MODIFY `id_vagas` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=113;
 
 --
 -- Restrições para tabelas despejadas

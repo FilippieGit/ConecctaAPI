@@ -102,6 +102,89 @@ try {
             );
             break;
 
+
+            ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
+
+            
+
+            case 'atualizarStatusCandidatura':
+    // Verificar método HTTP
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'error' => true,
+            'message' => 'Método POST requerido'
+        ]);
+        exit();
+    }
+
+    // Verificar parâmetros obrigatórios
+    $requiredParams = ['candidatura_id', 'novo_status', 'vaga_id', 'recrutador_id'];
+    $missingParams = array_diff($requiredParams, array_keys($_POST));
+    
+    if (!empty($missingParams)) {
+        http_response_code(400);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'error' => true,
+            'message' => 'Parâmetros obrigatórios faltando: ' . implode(', ', $missingParams)
+        ]);x
+        exit();
+    }
+
+    // Validar tipos de dados
+    if (!is_numeric($_POST['candidatura_id']) || !is_numeric($_POST['vaga_id']) || !is_numeric($_POST['recrutador_id'])) {
+        http_response_code(400);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'error' => true,
+            'message' => 'IDs devem ser valores numéricos'
+        ]);
+        exit();
+    }
+
+    // Obter motivo (opcional)
+    $motivo = isset($_POST['motivo']) ? trim($_POST['motivo']) : null;
+
+    // Processar a atualização
+    try {
+        $response = $db->atualizarStatusCandidaturaVaga(
+            (int)$_POST['candidatura_id'],
+            trim($_POST['novo_status']),
+            (int)$_POST['vaga_id'],
+            (int)$_POST['recrutador_id'],
+            $motivo
+        );
+
+        // Definir cabeçalhos antes de enviar a resposta
+        http_response_code($response['error'] ? 500 : 200);
+        header('Content-Type: application/json');
+        header('Content-Length: ' . strlen(json_encode($response)));
+        
+        // Enviar resposta
+        echo json_encode($response);
+        exit();
+    } catch (Exception $e) {
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'error' => true,
+            'message' => 'Erro no servidor: ' . $e->getMessage()
+        ]);
+        exit();
+    }
+    break;
+
+
+
+
+
+
         case 'verificarCandidatura':
             validateParameters(['user_id', 'vaga_id'], 'GET');
             $response = [
@@ -206,39 +289,62 @@ try {
             }
             break;
 
-        case 'listarCandidaturas':
-            if (!isset($_GET['vaga_id'])) {
-                http_response_code(400);
-                echo json_encode([
-                    'error' => true,
-                    'message' => 'Parâmetro vaga_id é obrigatório'
-                ]);
-                exit();
-            }
-            
-            $vaga_id = (int)$_GET['vaga_id'];
-            $response = $db->listarCandidatosPorVaga($vaga_id);
-            
-            // Se houver erro, retorna código 500
-            if ($response['error']) {
-                http_response_code(500);
-            }
-            
-            echo json_encode($response);
-            break;
+            case 'notificarTodosAprovados':
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['error' => true, 'message' => 'Método POST requerido']);
+        exit();
+    }
 
-        case 'atualizarStatusCandidatura':
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                http_response_code(405);
-                throw new Exception('Método POST requerido');
-            }
-            
-            validateParameters(['id_candidatura', 'status']);
-            $response = $db->atualizarStatusCandidatura(
-                (int)$_POST['id_candidatura'],
-                $_POST['status']
-            );
-            break;
+    validateParameters(['vaga_id', 'recrutador_id', 'mensagem']);
+
+    try {
+        $response = $db->notificarTodosAprovados(
+            (int)$_POST['vaga_id'],
+            (int)$_POST['recrutador_id'],
+            $_POST['mensagem']
+        );
+
+        error_log("Resposta JSON: " . json_encode($response)); // <-- agora no lugar certo
+
+        if ($response['error']) {
+            http_response_code(500);
+        }
+
+        echo json_encode($response);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => true,
+            'message' => $e->getMessage()
+        ]);
+    }
+    break;
+
+
+        case 'listarCandidaturas':
+    if (!isset($_GET['vaga_id'])) {
+        http_response_code(400);
+        echo json_encode([
+            'error' => true,
+            'message' => 'Parâmetro vaga_id é obrigatório'
+        ]);
+        exit();
+    }
+    
+    $vaga_id = (int)$_GET['vaga_id'];
+    $response = $db->listarCandidatosPorVaga($vaga_id);
+    
+    // Adiciona logs para depuração
+    error_log("Resposta listarCandidaturas: " . json_encode($response));
+    
+    // Se houver erro, retorna código 500
+    if ($response['error']) {
+        http_response_code(500);
+    }
+    
+    echo json_encode($response);
+    break;
 
         case 'excluirVaga':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

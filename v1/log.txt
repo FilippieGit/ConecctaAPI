@@ -1,0 +1,2 @@
+ID: 5 | Status: aprovada | Vaga: 41
+ID: 5 | Status: rejeitada | Vaga: 41

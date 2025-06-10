@@ -97,6 +97,50 @@ class DbOperation
         return $tbVagas;
     }
 
+    function getVagaById($vaga_id) {
+    try {
+        $stmt = $this->con->prepare("
+            SELECT 
+                v.id_vagas, 
+                v.titulo_vagas,
+                u.nome as nome_empresa
+            FROM 
+                vagas v
+            LEFT JOIN 
+                usuarios u ON v.id_usuario = u.id
+            WHERE 
+                v.id_vagas = ?
+            LIMIT 1
+        ");
+        
+        $stmt->bind_param("i", $vaga_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            return [
+                'error' => true,
+                'message' => 'Vaga não encontrada'
+            ];
+        }
+        
+        $vaga = $result->fetch_assoc();
+        
+        return [
+            'error' => false,
+            'vaga' => $vaga
+        ];
+        
+    } catch (Exception $e) {
+        return [
+            'error' => true,
+            'message' => $e->getMessage()
+        ];
+    }
+}
+
+
+
     function getUserByFirebaseUid($firebaseUid) {
         try {
             $stmt = $this->con->prepare("
@@ -392,26 +436,28 @@ function getVagasByUserId($userId) {
     }
 
 
-    public function atualizarStatusCandidaturaVaga(int $candidatura_id, string $novo_status, int $vaga_id, int $recrutador_id, ?string $motivo = null): array {
+
+
+    public function atualizarStatusCandidaturaVaga(int $candidatura_id, string $novo_status, int $vaga_id): array {
     try {
-        // Verifica permissão do recrutador para a vaga
-        $stmt = $this->con->prepare("SELECT 1 FROM vagas WHERE id_vagas = ? AND recrutador_id = ? LIMIT 1");
-        $stmt->bind_param("ii", $vaga_id, $recrutador_id);
+        // Log básico de entrada
+        file_put_contents('log.txt', "ID: $candidatura_id | Status: $novo_status | Vaga: $vaga_id\n", FILE_APPEND);
+
+        // Verifica se a vaga existe
+        $stmt = $this->con->prepare("SELECT 1 FROM vagas WHERE id_vagas = ? LIMIT 1");
+        if (!$stmt) throw new Exception("Erro prepare SELECT: " . $this->con->error);
+        $stmt->bind_param("i", $vaga_id);
         $stmt->execute();
         $stmt->store_result();
         if ($stmt->num_rows === 0) {
-            return ['error' => true, 'message' => 'Recrutador não autorizado para esta vaga.'];
+            return ['error' => true, 'message' => 'Vaga não encontrada.'];
         }
         $stmt->close();
 
-        // Atualiza status e motivo (se tiver)
-        if ($motivo !== null && trim($motivo) !== '') {
-            $stmt = $this->con->prepare("UPDATE candidaturas SET status = ?, motivo_rejeicao = ? WHERE id = ? AND vaga_id = ?");
-            $stmt->bind_param("ssii", $novo_status, $motivo, $candidatura_id, $vaga_id);
-        } else {
-            $stmt = $this->con->prepare("UPDATE candidaturas SET status = ?, motivo_rejeicao = NULL WHERE id = ? AND vaga_id = ?");
-            $stmt->bind_param("sii", $novo_status, $candidatura_id, $vaga_id);
-        }
+        // Atualiza o status
+        $stmt = $this->con->prepare("UPDATE candidaturas SET status = ?, motivo_rejeicao = NULL WHERE id = ? AND vaga_id = ?");
+        if (!$stmt) throw new Exception("Erro prepare UPDATE: " . $this->con->error);
+        $stmt->bind_param("sii", $novo_status, $candidatura_id, $vaga_id);
 
         if ($stmt->execute()) {
             return ['error' => false, 'message' => 'Status atualizado com sucesso.'];
@@ -424,186 +470,275 @@ function getVagasByUserId($userId) {
 }
 
 
-    private function enviarNotificacaoAprovacao($candidatura_id, $vaga_id) {
+
+
+    private function enviarNotificacaoAprovacao($candidatura_id, $vaga_id, $titulo_vaga, $descricao_vaga, $mensagem, $candidato) {
     try {
-        // Buscar informações da vaga, candidato e token FCM
-        $stmt = $this->con->prepare("
-            SELECT u.email, u.nome as nome_candidato, v.titulo_vagas, u.fcm_token
-            FROM candidaturas c
-            JOIN usuarios u ON c.user_id = u.id
-            JOIN vagas v ON c.vaga_id = v.id_vagas
-            WHERE c.id_candidatura = ? AND c.vaga_id = ?
-        ");
-        $stmt->bind_param("ii", $candidatura_id, $vaga_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows > 0) {
-            $data = $result->fetch_assoc();
-            $titulo_vaga = $data['titulo_vagas'];
-            
-            // Enviar e-mail (código anterior)
-            $this->enviarEmailAprovacao($data['email'], $data['nome_candidato'], $titulo_vaga);
-            
-            // Enviar notificação push se houver token
-            if (!empty($data['fcm_token'])) {
-                $this->enviarNotificacaoPush($data['fcm_token'], $titulo_vaga);
+        // Enviar e-mail
+        $assunto = "Parabéns! Você foi aprovado para a vaga de {$titulo_vaga}";
+                
+        $mensagem_email = $this->criarEmailAprovacao(
+            $candidato['nome'],
+            $titulo_vaga,
+            $descricao_vaga,
+            $mensagem,
+            $candidato['data_candidatura']
+        );
+
+        if (!$this->enviarEmail($candidato['email'], $assunto, $mensagem_email)) {
+            throw new Exception("Falha ao enviar e-mail para {$candidato['email']}");
+        }
+
+        // Enviar notificação push se houver token
+        if (!empty($candidato['fcm_token'])) {
+            if (!$this->enviarNotificacaoPush(
+                $candidato['fcm_token'],
+                "Parabéns! Você foi aprovado",
+                "Você foi selecionado para a vaga de {$titulo_vaga}",
+                ['vaga_id' => $vaga_id]
+            )) {
+                throw new Exception("Falha ao enviar notificação para {$candidato['nome']}");
             }
         }
     } catch (Exception $e) {
-        error_log("[DbOperation] Erro ao enviar notificação: " . $e->getMessage());
+        error_log("[DbOperation] Erro ao enviar notificação para candidato {$candidato['nome']}: " . $e->getMessage());
+        throw $e; // Re-lançar a exceção para ser tratada na função principal
     }
 }
 
-function notificarTodosAprovados($vaga_id, $recrutador_id, $mensagem) {
-    error_log("[DbOperation] Notificando todos aprovados para vaga $vaga_id");
-    
-    try {
-        // Verificar permissão do recrutador na tabela vagas
-        $stmt = $this->con->prepare("SELECT 1 FROM vagas WHERE id_vagas = ? AND recrutador_id = ? LIMIT 1");
-        $stmt->bind_param("ii", $vaga_id, $recrutador_id);
-        $stmt->execute();
-        $stmt->store_result();
-        
-        if ($stmt->num_rows == 0) {
-            throw new Exception("Recrutador não tem permissão para esta vaga.");
-        }
-        $stmt->close();
-        
-        // Buscar título da vaga
-        $stmt = $this->con->prepare("SELECT titulo_vagas FROM vagas WHERE id_vagas = ?");
-        $stmt->bind_param("i", $vaga_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $vaga = $result->fetch_assoc();
-        $titulo_vaga = $vaga['titulo_vagas'];
 
-        // Buscar candidatos aprovados
-        $stmt = $this->con->prepare("
-            SELECT u.id, u.email, u.nome, u.fcm_token 
+
+
+
+
+
+
+
+
+/**
+ * Função para notificar todos os candidatos aprovados de uma vaga
+ */
+function notificarTodosAprovados($vaga_id, $recrutador_id, $mensagem_personalizada = '')
+{
+    $response = ['error' => false];
+    $emails_enviados = 0;
+    $erros = [];
+
+    try {
+        // Conectar ao banco
+        $db = new DbConnect();
+        $con = $db->connect();
+
+        // 1. Buscar informações da vaga
+        $stmtVaga = $con->prepare("SELECT titulo FROM vagas WHERE id = ?");
+        $stmtVaga->bind_param("i", $vaga_id);
+        $stmtVaga->execute();
+        $vaga = $stmtVaga->get_result()->fetch_assoc();
+        
+        if (!$vaga) {
+            throw new Exception("Vaga não encontrada");
+        }
+
+        // 2. Buscar candidaturas aprovadas com dados do usuário
+        $stmtCandidatos = $con->prepare("
+            SELECT c.id_candidatura, u.id, u.nome, u.email 
             FROM candidaturas c
-            JOIN usuarios u ON c.user_id = u.id
+            JOIN users u ON c.user_id = u.id
             WHERE c.vaga_id = ? AND c.status = 'aprovada'
         ");
-        $stmt->bind_param("i", $vaga_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $stmtCandidatos->bind_param("i", $vaga_id);
+        $stmtCandidatos->execute();
+        $candidatos = $stmtCandidatos->get_result()->fetch_all(MYSQLI_ASSOC);
 
-        $notificados = 0;
-        $emails_enviados = 0;
-        $notificacoes_enviadas = 0;
+        if (empty($candidatos)) {
+            $response['message'] = "Nenhum candidato aprovado para esta vaga";
+            return $response;
+        }
 
-        while ($candidato = $result->fetch_assoc()) {
-            $notificados++;
+        // 3. Configurar PHPMailer (substitua com suas configurações)
+        require_once __DIR__ . '/../lib/PHPMailer/src/PHPMailer.php';
+        require_once __DIR__ . '/../lib/PHPMailer/src/SMTP.php';
+        
+        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+        
+        // Configurações do servidor SMTP
+        $mail->isSMTP();
+        $mail->Host = 'smtp.seuprovedor.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'contato@empresa.com';
+        $mail->Password = 'sua_senha';
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+        $mail->CharSet = 'UTF-8';
+        
+        $mail->setFrom('recrutamento@empresa.com', 'Recrutamento');
+        $mail->isHTML(true);
 
-            // Enviar e-mail (substitua mail() pelo PHPMailer se quiser)
-            $assunto = "Atualização sobre sua candidatura para $titulo_vaga";
-            $mensagem_email = "
-                <html>
-                <body>
-                    <p>Olá {$candidato['nome']},</p>
-                    <p>Segue uma atualização sobre sua candidatura para a vaga <strong>$titulo_vaga</strong>:</p>
-                    <p><em>$mensagem</em></p>
+        // 4. Enviar emails para cada candidato
+        foreach ($candidatos as $candidato) {
+            try {
+                $mail->clearAddresses();
+                $mail->addAddress($candidato['email'], $candidato['nome']);
+                
+                $mail->Subject = 'Parabéns! Sua candidatura foi aprovada - ' . $vaga['titulo'];
+                
+                // Corpo do email (HTML e versão texto)
+                $bodyHTML = "
+                    <h1>Olá {$candidato['nome']}!</h1>
+                    <p>Estamos felizes em informar que sua candidatura para a vaga <strong>{$vaga['titulo']}</strong> foi aprovada!</p>
+                    " . (!empty($mensagem_personalizada) ? "<p>Mensagem do recrutador: {$mensagem_personalizada}</p>" : "") . "
+                    <p>Em breve nosso time entrará em contato com você para os próximos passos.</p>
                     <p>Atenciosamente,<br>Equipe de Recrutamento</p>
-                </body>
-                </html>
-            ";
-
-            $headers = "MIME-Version: 1.0\r\n";
-            $headers .= "Content-type: text/html; charset=UTF-8\r\n";
-            $headers .= "From: recrutamento@seusite.com\r\n";
-
-            if (mail($candidato['email'], $assunto, $mensagem_email, $headers)) {
-                $emails_enviados++;
-            }
-
-            // Enviar notificação push se houver token
-            if (!empty($candidato['fcm_token'])) {
-                $notificacao = [
-                    'title' => 'Atualização da Candidatura',
-                    'body' => $mensagem,
-                    'sound' => 'default'
-                ];
-
-                $fields = [
-                    'to' => $candidato['fcm_token'],
-                    'notification' => $notificacao,
-                    'priority' => 'high'
-                ];
-
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Authorization: key=SUA_CHAVE_DO_SERVIDOR_FIREBASE',
-                    'Content-Type: application/json'
-                ]);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
-
-                $resultado_fcm = curl_exec($ch);
-                if ($resultado_fcm !== FALSE) {
-                    $notificacoes_enviadas++;
+                ";
+                
+                $bodyText = strip_tags($bodyHTML);
+                
+                $mail->Body = $bodyHTML;
+                $mail->AltBody = $bodyText;
+                
+                // Enviar email
+                if ($mail->send()) {
+                    $emails_enviados++;
+                    
+                    // Registrar no log que o email foi enviado
+                    $stmtUpdate = $con->prepare("
+                        UPDATE candidaturas 
+                        SET data_atualizacao = NOW() 
+                        WHERE id_candidatura = ?
+                    ");
+                    $stmtUpdate->bind_param("i", $candidato['id_candidatura']);
+                    $stmtUpdate->execute();
+                } else {
+                    $erros[] = "Falha ao enviar para {$candidato['email']}: " . $mail->ErrorInfo;
                 }
-                curl_close($ch);
+            } catch (Exception $e) {
+                $erros[] = "Erro ao enviar para {$candidato['email']}: " . $e->getMessage();
             }
         }
 
-        return [
-            'error' => false,
-            'message' => "Notificações enviadas com sucesso",
-            'notificados' => $notificados,
-            'emails_enviados' => $emails_enviados,
-            'notificacoes_enviadas' => $notificacoes_enviadas
-        ];
+        // 5. Montar resposta
+        $response['emails_enviados'] = $emails_enviados;
+        $response['total_candidatos'] = count($candidatos);
+        $response['vaga_id'] = $vaga_id;
+        $response['vaga_titulo'] = $vaga['titulo'];
+        
+        if (!empty($erros)) {
+            $response['erros'] = $erros;
+            $response['message'] = "Emails enviados com alguns erros";
+        } else {
+            $response['message'] = "Todos os emails foram enviados com sucesso!";
+        }
 
     } catch (Exception $e) {
-        error_log("[DbOperation] Erro ao notificar aprovados: " . $e->getMessage());
-        return [
-            'error' => true,
-            'message' => $e->getMessage()
-        ];
+        $response['error'] = true;
+        $response['message'] = $e->getMessage();
     }
+
+    return $response;
 }
 
 
-private function enviarNotificacaoPush($fcmToken, $tituloVaga) {
+
+private function criarEmailAprovacao($nome, $tituloVaga, $descricaoVaga, $mensagemRecrutador, $dataCandidatura) {
+    $dataFormatada = date('d/m/Y', strtotime($dataCandidatura));
+    
+    return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #4CAF50; color: white; padding: 10px; text-align: center; }
+                .content { padding: 20px; }
+                .footer { margin-top: 20px; font-size: 0.8em; color: #666; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>Parabéns, $nome!</h1>
+                </div>
+                
+                <div class='content'>
+                    <p>Você foi <strong>aprovado</strong> para a vaga:</p>
+                    <h2>$tituloVaga</h2>
+                    <p><em>$descricaoVaga</em></p>
+                    
+                    <h3>Mensagem do recrutador:</h3>
+                    <blockquote>$mensagemRecrutador</blockquote>
+                    
+                    <p>Você se candidatou em: $dataFormatada</p>
+                    
+                    <p>Em breve o recrutador entrará em contato com você para os próximos passos.</p>
+                </div>
+                
+                <div class='footer'>
+                    <p>Atenciosamente,<br>Equipe de Recrutamento</p>
+                </div>
+            </div>
+        </body>
+        </html>
+    ";
+}
+
+private function enviarEmail($para, $assunto, $mensagem) {
+    // Configurações do e-mail
+    $headers = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+    $headers .= "From: recrutamento@seusite.com\r\n";
+    $headers .= "Reply-To: recrutamento@seusite.com\r\n";
+    
+    // Usar PHPMailer ou função mail() nativa
+    return mail($para, $assunto, $mensagem, $headers);
+}
+
+private function enviarNotificacaoPush($token, $titulo, $mensagem, $dados = []) {
     $url = 'https://fcm.googleapis.com/fcm/send';
     
-    $serverKey = 'SUA_CHAVE_DO_SERVIDOR_FIREBASE'; // Substitua pela sua chave
-    
-    $notification = [
-        'title' => 'Candidatura Aprovada',
-        'body' => "Parabéns! Sua candidatura para $tituloVaga foi aprovada",
-        'sound' => 'default'
-    ];
-    
     $fields = [
-        'to' => $fcmToken,
-        'notification' => $notification,
+        'to' => $token,
+        'notification' => [
+            'title' => $titulo,
+            'body' => $mensagem,
+            'sound' => 'default'
+        ],
+        'data' => $dados,
         'priority' => 'high'
     ];
-    
+
     $headers = [
-        'Authorization: key=' . $serverKey,
+        'Authorization: key=' . $this->fcmServerKey,
         'Content-Type: application/json'
     ];
-    
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($fields));
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Apenas para desenvolvimento
     
     $result = curl_exec($ch);
-    if ($result === FALSE) {
-        error_log('[DbOperation] Falha ao enviar notificação push: ' . curl_error($ch));
-    } else {
-        error_log('[DbOperation] Notificação push enviada com sucesso');
-    }
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+
+    if ($httpCode == 200) {
+        $response = json_decode($result, true);
+        return $response['success'] == 1;
+    }
+    
+    return false;
 }
+
+
+
+
+
+
+
+
 
     function listarCandidatosPorVaga($vaga_id) {
     try {
@@ -799,6 +934,10 @@ private function enviarNotificacaoPush($fcmToken, $tituloVaga) {
         $stmt->bind_param("ssis", $name, $realname, $rating, $teamaffiliation);
         return $stmt->execute();
     }
+
+    public function getConnection() {
+    return $this->con; // Ou qualquer que seja o nome da sua variável de conexão
+}
 
     // Listar Currículo
     function getcadastrarCurriculo(){

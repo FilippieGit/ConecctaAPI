@@ -8,7 +8,7 @@ header("Content-Type: application/json; charset=UTF-8");
 
 // Ativar erros durante o desenvolvimento
 ini_set('display_errors', 1);
-error_reporting(E_ALL);
+error_reporting(0);
 
 // Limpar buffer de saída
 while (ob_get_level() > 0) {
@@ -24,15 +24,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 // Incluir arquivo necessário
 require_once __DIR__ . '/../includes/DbOperation.php';
 
+function getRequestData()
+{
+    $method = $_SERVER['REQUEST_METHOD'];
+
+    // Verifica o Content-Type
+    $contentType = $_SERVER["CONTENT_TYPE"] ?? '';
+
+    if (stripos($contentType, 'application/json') !== false) {
+        // Se for JSON, lê o input raw e decodifica
+        $inputJSON = file_get_contents('php://input');
+        $data = json_decode($inputJSON, true);
+        if (!is_array($data)) {
+            $data = [];
+        }
+        return $data;
+    } else if ($method === 'POST') {
+        return $_POST;
+    } else if ($method === 'GET') {
+        return $_GET;
+    } else {
+        return [];
+    }
+}
 /**
  * Verifica se os parâmetros necessários estão disponíveis
  */
-function validateParameters($requiredParams, $method = 'POST') {
-    $input = ($method === 'POST') ? $_POST : $_GET;
-    $missing = array_filter($requiredParams, function($param) use ($input) {
-        return !isset($input[$param]) || (is_string($input[$param]) && trim($input[$param]) === '');
-    });
-    
+function validateParameters($requiredParams)
+{
+    $input = getRequestData();
+
+    $missing = [];
+    foreach ($requiredParams as $param) {
+        if (!isset($input[$param]) || (is_string($input[$param]) && trim($input[$param]) === '')) {
+            $missing[] = $param;
+        }
+    }
+
     if (!empty($missing)) {
         http_response_code(400);
         echo json_encode([
@@ -41,7 +69,12 @@ function validateParameters($requiredParams, $method = 'POST') {
         ]);
         exit();
     }
+
+    return $input;  // Retorna os dados já validados para uso posterior
 }
+
+// Recupera os dados da requisição
+$inputData = getRequestData();
 
 try {
     // Verificar método HTTP
@@ -52,28 +85,35 @@ try {
     }
 
     // Verificar chamada de API
-    if (!isset($_GET['apicall'])) {
+    if (!isset($inputData['apicall'])) {
         http_response_code(400);
         throw new Exception('Parâmetro apicall é obrigatório');
     }
 
     $db = new DbOperation();
     $response = ['error' => false];
-    
-    switch ($_GET['apicall']) {
+
+    switch ($inputData['apicall']) {
         case 'getVagas':
             $response['vagas'] = $db->getVagas();
             $response['count'] = count($response['vagas']);
             break;
 
+        case 'getVagasByUserId':
+            validateParameters(['user_id']);
+            $response['vagas'] = $db->getVagasByUserId((int)$inputData['user_id']);
+            $response['count'] = count($response['vagas']);
+            break;
 
-            case 'getVagasByUserId':
-    validateParameters(['user_id'], 'GET');
-    $response['vagas'] = $db->getVagasByUserId((int)$_GET['user_id']);
-    $response['count'] = count($response['vagas']);
+            case 'getVagaById':
+    validateParameters(['vaga_id']);
+    $vaga_id = (int)$inputData['vaga_id'];
+    $response = $db->getVagaById($vaga_id);
     break;
 
-        case 'cadastrarVaga':   
+
+
+        case 'cadastrarVaga':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
                 throw new Exception('Método POST requerido');
@@ -84,120 +124,85 @@ try {
                 'salario', 'tipo_contrato', 'area_atuacao', 'id_usuario',
                 'beneficios', 'nivel_experiencia', 'habilidades_desejaveis', 'ramo'
             ];
-            validateParameters($requiredParams);
+            $postData = validateParameters($requiredParams);
 
             $response = $db->cadastrarVagas(
-                $_POST['titulo'],
-                $_POST['localizacao'],
-                $_POST['descricao'],
-                $_POST['requisitos'],
-                $_POST['salario'],
-                $_POST['tipo_contrato'],
-                $_POST['area_atuacao'],
-                $_POST['id_usuario'],
-                $_POST['beneficios'],
-                $_POST['nivel_experiencia'],
-                $_POST['habilidades_desejaveis'],
-                $_POST['ramo']
+                $postData['titulo'],
+                $postData['localizacao'],
+                $postData['descricao'],
+                $postData['requisitos'],
+                $postData['salario'],
+                $postData['tipo_contrato'],
+                $postData['area_atuacao'],
+                $postData['id_usuario'],
+                $postData['beneficios'],
+                $postData['nivel_experiencia'],
+                $postData['habilidades_desejaveis'],
+                $postData['ramo']
             );
             break;
 
+        case 'atualizarStatusCandidatura':
+            header('Content-Type: application/json');
 
-            ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+            try {
+                // Caminho correto para DbConnect.php (um diretório acima)
+                $dbConnectPath = __DIR__ . '/../includes/DbConnect.php';
+                if (!file_exists($dbConnectPath)) {
+                    throw new Exception("Arquivo DbConnect.php não encontrado em: " . $dbConnectPath);
+                }
 
+                require_once $dbConnectPath;
+                $db = new DbConnect();
+                $con = $db->connect();
 
+                // Validar parâmetros
+                if (!isset($inputData['candidatura_id'], $inputData['novo_status'], $inputData['vaga_id'])) {
+                    throw new Exception("Parâmetros obrigatórios faltando");
+                }
 
-            
+                $candidatura_id = (int)$inputData['candidatura_id'];
+                $novo_status = strtolower(trim($inputData['novo_status']));
+                $vaga_id = (int)$inputData['vaga_id'];
 
-            case 'atualizarStatusCandidatura':
-    // Verificar método HTTP
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        http_response_code(405);
-        header('Content-Type: application/json');
-        echo json_encode([
-            'error' => true,
-            'message' => 'Método POST requerido'
-        ]);
-        exit();
-    }
+                // Validar status
+                $statusPermitidos = ['aprovada', 'rejeitada', 'pendente', 'visualizada'];
+                if (!in_array($novo_status, $statusPermitidos)) {
+                    throw new Exception("Status inválido: " . $novo_status);
+                }
 
-    // Verificar parâmetros obrigatórios
-    $requiredParams = ['candidatura_id', 'novo_status', 'vaga_id', 'recrutador_id'];
-    $missingParams = array_diff($requiredParams, array_keys($_POST));
-    
-    if (!empty($missingParams)) {
-        http_response_code(400);
-        header('Content-Type: application/json');
-        echo json_encode([
-            'error' => true,
-            'message' => 'Parâmetros obrigatórios faltando: ' . implode(', ', $missingParams)
-        ]);x
-        exit();
-    }
+                // Atualizar no banco
+                $stmt = $con->prepare("UPDATE candidaturas SET status = ?, data_atualizacao = NOW() WHERE id_candidatura = ? AND vaga_id = ?");
+                $stmt->bind_param("sii", $novo_status, $candidatura_id, $vaga_id);
 
-    // Validar tipos de dados
-    if (!is_numeric($_POST['candidatura_id']) || !is_numeric($_POST['vaga_id']) || !is_numeric($_POST['recrutador_id'])) {
-        http_response_code(400);
-        header('Content-Type: application/json');
-        echo json_encode([
-            'error' => true,
-            'message' => 'IDs devem ser valores numéricos'
-        ]);
-        exit();
-    }
-
-    // Obter motivo (opcional)
-    $motivo = isset($_POST['motivo']) ? trim($_POST['motivo']) : null;
-
-    // Processar a atualização
-    try {
-        $response = $db->atualizarStatusCandidaturaVaga(
-            (int)$_POST['candidatura_id'],
-            trim($_POST['novo_status']),
-            (int)$_POST['vaga_id'],
-            (int)$_POST['recrutador_id'],
-            $motivo
-        );
-
-        // Definir cabeçalhos antes de enviar a resposta
-        http_response_code($response['error'] ? 500 : 200);
-        header('Content-Type: application/json');
-        header('Content-Length: ' . strlen(json_encode($response)));
-        
-        // Enviar resposta
-        echo json_encode($response);
-        exit();
-    } catch (Exception $e) {
-        http_response_code(500);
-        header('Content-Type: application/json');
-        echo json_encode([
-            'error' => true,
-            'message' => 'Erro no servidor: ' . $e->getMessage()
-        ]);
-        exit();
-    }
-    break;
-
-
-
-
-
+                if ($stmt->execute()) {
+                    echo json_encode([
+                        'error' => false,
+                        'message' => "Status atualizado com sucesso",
+                        'novo_status' => $novo_status
+                    ]);
+                } else {
+                    throw new Exception("Erro ao executar query: " . $stmt->error);
+                }
+            } catch (Exception $e) {
+                http_response_code(500);
+                echo json_encode([
+                    'error' => true,
+                    'message' => $e->getMessage()
+                ]);
+            }
+            break;
 
         case 'verificarCandidatura':
-            validateParameters(['user_id', 'vaga_id'], 'GET');
+            validateParameters(['user_id', 'vaga_id']);
             $response = [
-                'ja_candidatado' => $db->verificarCandidatura($_GET['user_id'], (int)$_GET['vaga_id'])
+                'ja_candidatado' => $db->verificarCandidatura($inputData['user_id'], (int)$inputData['vaga_id'])
             ];
             break;
 
-            case 'getUserByFirebaseUid':
-            if (!isset($_GET['uid'])) {
-                throw new Exception('Parâmetro uid é obrigatório');
-            }
-
-            $result = $db->getUserByFirebaseUid($_GET['uid']);
+        case 'getUserByFirebaseUid':
+            validateParameters(['uid']);
+            $result = $db->getUserByFirebaseUid($inputData['uid']);
             if ($result['error']) {
                 throw new Exception($result['message']);
             }
@@ -211,17 +216,14 @@ error_reporting(E_ALL);
             }
 
             $required = ['uid', 'email', 'nome'];
-            $missing = array_diff($required, array_keys($_POST));
-            if (!empty($missing)) {
-                throw new Exception('Parâmetros faltando: ' . implode(', ', $missing));
-            }
+            $syncData = validateParameters($required);
 
             $result = $db->syncFirebaseUser(
-                $_POST['uid'],
-                $_POST['email'],
-                $_POST['nome'],
-                $_POST['tipo'] ?? 'Física',
-                $_POST['documento'] ?? null
+                $syncData['uid'],
+                $syncData['email'],
+                $syncData['nome'],
+                $syncData['tipo'] ?? 'Física',
+                $syncData['documento'] ?? null
             );
 
             if ($result['error']) {
@@ -239,7 +241,8 @@ error_reporting(E_ALL);
                 exit();
             }
 
-            parse_str(file_get_contents("php://input"), $postData);
+            // Aqui estamos pegando os dados do corpo da requisição
+            $postData = getRequestData();
 
             if (!isset($postData['user_id']) || !isset($postData['vaga_id'])) {
                 http_response_code(400);
@@ -275,12 +278,12 @@ error_reporting(E_ALL);
                 echo json_encode(['error' => true, 'message' => 'UID do Firebase é obrigatório']);
                 exit();
             }
-            
+
             $stmt = $con->prepare("SELECT id FROM usuarios WHERE firebase_uid = ?");
             $stmt->bind_param("s", $_GET['uid']);
             $stmt->execute();
             $result = $stmt->get_result();
-            
+
             if ($result->num_rows > 0) {
                 $user = $result->fetch_assoc();
                 echo json_encode(['error' => false, 'id' => $user['id']]);
@@ -289,78 +292,85 @@ error_reporting(E_ALL);
             }
             break;
 
-            case 'notificarTodosAprovados':
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        http_response_code(405);
-        echo json_encode(['error' => true, 'message' => 'Método POST requerido']);
-        exit();
-    }
 
-    validateParameters(['vaga_id', 'recrutador_id', 'mensagem']);
 
+
+
+case 'notificarTodosAprovados':
     try {
-        $response = $db->notificarTodosAprovados(
-            (int)$_POST['vaga_id'],
-            (int)$_POST['recrutador_id'],
-            $_POST['mensagem']
+        // Validar parâmetros
+        $requiredParams = ['vaga_id', 'recrutador_id', 'mensagem'];
+        $input = validateParameters($requiredParams);
+
+        // Obter conexão do DbOperation (assumindo que $db já existe)
+        $dbConnection = $db->getConnection(); // Você precisará adicionar este método ao DbOperation se não existir
+        
+        // Criar serviço de email
+        require_once __DIR__ . '/../includes/EmailService.php';
+        $emailService = new EmailService($dbConnection);
+        
+        // Chamar função de notificação
+        $response = $emailService->notificarCandidatosAprovados(
+            (int)$input['vaga_id'],
+            (int)$input['recrutador_id'],
+            $input['mensagem']
         );
 
-        error_log("Resposta JSON: " . json_encode($response)); // <-- agora no lugar certo
-
-        if ($response['error']) {
-            http_response_code(500);
-        }
-
         echo json_encode($response);
+        
     } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode([
-            'error' => true,
-            'message' => $e->getMessage()
-        ]);
+        echo json_encode(['error' => true, 'message' => $e->getMessage()]);
     }
     break;
+
+
+
+
+
+
+
+
 
 
         case 'listarCandidaturas':
-    if (!isset($_GET['vaga_id'])) {
-        http_response_code(400);
-        echo json_encode([
-            'error' => true,
-            'message' => 'Parâmetro vaga_id é obrigatório'
-        ]);
-        exit();
-    }
-    
-    $vaga_id = (int)$_GET['vaga_id'];
-    $response = $db->listarCandidatosPorVaga($vaga_id);
-    
-    // Adiciona logs para depuração
-    error_log("Resposta listarCandidaturas: " . json_encode($response));
-    
-    // Se houver erro, retorna código 500
-    if ($response['error']) {
-        http_response_code(500);
-    }
-    
-    echo json_encode($response);
-    break;
+            if (!isset($_GET['vaga_id'])) {
+                http_response_code(400);
+                echo json_encode([
+                    'error' => true,
+                    'message' => 'Parâmetro vaga_id é obrigatório'
+                ]);
+                exit();
+            }
+
+            $vaga_id = (int)$_GET['vaga_id'];
+            $response = $db->listarCandidatosPorVaga($vaga_id);
+
+            // Adiciona logs para depuração
+            error_log("Resposta listarCandidaturas: " . json_encode($response));
+
+            // Se houver erro, retorna código 500
+            if ($response['error']) {
+                http_response_code(500);
+            }
+
+            echo json_encode($response);
+            break;
 
         case 'excluirVaga':
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 http_response_code(405);
                 throw new Exception('Método POST requerido');
             }
-            
-            validateParameters(['id_vaga']);
-            $response = $db->excluirVagas((int)$_POST['id_vaga']);
+
+            $exclusaoData = validateParameters(['id_vaga']);
+            $response = $db->excluirVagas((int)$exclusaoData['id_vaga']);
             break;
 
         default:
             http_response_code(404);
             throw new Exception('Operação não implementada');
     }
-
 } catch (Exception $e) {
     $response = [
         'error' => true,

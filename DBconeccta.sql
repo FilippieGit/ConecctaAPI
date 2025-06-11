@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 06/06/2025 às 07:53
+-- Tempo de geração: 11/06/2025 às 04:14
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -33,16 +33,19 @@ CREATE TABLE `candidaturas` (
   `user_id` bigint(20) UNSIGNED NOT NULL,
   `respostas` text DEFAULT NULL,
   `data_candidatura` datetime DEFAULT current_timestamp(),
-  `status` enum('pendente','visualizada','aprovada','rejeitada') DEFAULT 'pendente'
+  `status` enum('pendente','visualizada','aprovada','rejeitada') NOT NULL DEFAULT 'pendente',
+  `data_atualizacao` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
+  `motivo_rejeicao` varchar(255) DEFAULT NULL,
+  `recrutador_id` bigint(20) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Despejando dados para a tabela `candidaturas`
 --
 
-INSERT INTO `candidaturas` (`id_candidatura`, `vaga_id`, `user_id`, `respostas`, `data_candidatura`, `status`) VALUES
-(4, 41, 2, '{\"interesse\":\"12313\",\"expectativas\":\"1313\",\"valores\":\"13131313\"}', '2025-06-01 16:52:44', 'pendente'),
-(5, 41, 24, '{\"interesse\":\"Filippie\",\"expectativas\":\"Filippie\",\"valores\":\"Filippie\"}', '2025-06-04 16:57:39', 'pendente');
+INSERT INTO `candidaturas` (`id_candidatura`, `vaga_id`, `user_id`, `respostas`, `data_candidatura`, `status`, `data_atualizacao`, `motivo_rejeicao`, `recrutador_id`) VALUES
+(4, 41, 2, '{\"interesse\":\"12313\",\"expectativas\":\"1313\",\"valores\":\"13131313\"}', '2025-06-01 16:52:44', 'rejeitada', '2025-06-10 23:10:29', NULL, 25),
+(5, 41, 24, '{\"interesse\":\"Filippie\",\"expectativas\":\"Filippie\",\"valores\":\"Filippie\"}', '2025-06-04 16:57:39', 'aprovada', '2025-06-10 23:10:31', NULL, 25);
 
 -- --------------------------------------------------------
 
@@ -67,24 +70,26 @@ CREATE TABLE `usuarios` (
   `imagem_perfil` varchar(255) DEFAULT NULL,
   `tipo` varchar(50) DEFAULT NULL,
   `CNPJ` varchar(50) DEFAULT NULL,
-  `website` varchar(255) DEFAULT NULL
+  `website` varchar(255) DEFAULT NULL,
+  `fcm_token` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Despejando dados para a tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `firebase_uid`, `nome`, `username`, `genero`, `idade`, `telefone`, `email`, `setor`, `descricao`, `experiencia_profissional`, `formacao_academica`, `certificados`, `imagem_perfil`, `tipo`, `CNPJ`, `website`) VALUES
-(2, '2IpuGWWdVYSO7f4Qm6VdU2JIwDR2', 'Felipe Lula', 'lulafelipe7', '', NULL, '', 'lulafelipe7@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', '', ''),
-(4, 'Zz3B0U6OvkOOzcQPxFisRDMfGkx1', 'Teste', 'Felipethums07', '', NULL, '', '0', '', '', '[]', '[]', '[]', '', NULL, NULL, NULL),
-(23, 'ca0vzfwcNaaCszxd3uCnQLu5dta2', 'Felipe Lula', 'lulagadogurilla', '', NULL, '', 'lulagadogurilla@gmail.com', 'rsrs', '', '', '', '', '', NULL, NULL, NULL),
-(24, 'ayJU8fpgcPc0sK1qY7KSPsXShJ32', 'Filippie Amaral', 'reservac31', '', NULL, '', 'reservac31@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', '', ''),
-(25, 'Yp8AlhokRyN5JVFjZ5Rc9Z05n0S2', 'TechSolutions LTDA.', 'reservac32', '', NULL, '', 'reservac32@gmail.com', '', '', '[]', '[]', '[]', '', 'Jurídica', '123123123122311', 'TechSolutions.com.br'),
-(26, 'WJshVxy4RQPiBHG16Kaq8iVD8dn1', 'Gustavo', 'gustavopthums', '', NULL, '', 'gustavopthums@gmail.com', '', '', '[]', '[]', '[]', '', NULL, NULL, NULL),
-(28, 'xgjkhJ9P8fO9jRf8apXBZ0rbN5j1', 'Matheus', 'zorkynanyomae', '', NULL, '', 'zorkynanyomae@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', NULL, NULL),
-(29, 'QE7kkoYbypdj74KukV8kbJ0RCzV2', 'teste', 'lulacssbuy13', '', NULL, '', 'lulacssbuy13@gmail.com', '', '', '[]', '[]', '[]', '', 'Jurídica', '777-9999-8989', '123.com'),
-(30, 'FvdQNhiFapY1XQCC7YeoyGzOe9s2', '1231', 'filippieamaral', '', NULL, '', 'filippieamaral@gmail.com', '', '', '[]', '[]', '[]', '', 'Jurídica', '213', '213213'),
-(31, 'gBCXwrfl1zNNYThLI6LL7laUjLj1', '123123', 'filippielindoo', '', NULL, '', 'filippielindoo@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', '', '');
+INSERT INTO `usuarios` (`id`, `firebase_uid`, `nome`, `username`, `genero`, `idade`, `telefone`, `email`, `setor`, `descricao`, `experiencia_profissional`, `formacao_academica`, `certificados`, `imagem_perfil`, `tipo`, `CNPJ`, `website`, `fcm_token`) VALUES
+(2, '2IpuGWWdVYSO7f4Qm6VdU2JIwDR2', 'Felipe Lula', 'lulafelipe7', '', NULL, '', 'lulafelipe7@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', '', '', NULL),
+(4, 'Zz3B0U6OvkOOzcQPxFisRDMfGkx1', 'Teste', 'Felipethums07', '', NULL, '', '0', '', '', '[]', '[]', '[]', '', NULL, NULL, NULL, NULL),
+(23, 'ca0vzfwcNaaCszxd3uCnQLu5dta2', 'Felipe Lula', 'lulagadogurilla', '', NULL, '', 'lulagadogurilla@gmail.com', 'rsrs', '', '', '', '', '', NULL, NULL, NULL, NULL),
+(24, 'ayJU8fpgcPc0sK1qY7KSPsXShJ32', 'Filippie Amaral', 'reservac31', '', NULL, '', 'reservac31@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', '', '', NULL),
+(25, 'Yp8AlhokRyN5JVFjZ5Rc9Z05n0S2', 'TechSolutions LTDA.', 'reservac32', '', NULL, '', 'reservac32@gmail.com', '', '', '[]', '[]', '[]', '', 'Jurídica', '123123123122311', 'TechSolutions.com.br', NULL),
+(26, 'WJshVxy4RQPiBHG16Kaq8iVD8dn1', 'Gustavo', 'gustavopthums', '', NULL, '', 'gustavopthums@gmail.com', '', '', '[]', '[]', '[]', '', NULL, NULL, NULL, NULL),
+(28, 'xgjkhJ9P8fO9jRf8apXBZ0rbN5j1', 'Matheus', 'zorkynanyomae', '', NULL, '', 'zorkynanyomae@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', NULL, NULL, NULL),
+(29, 'GDQGTej1qeRiPhPYPI4jLUjjBB32', 'ksksks', 'lulacssbuy13', '', NULL, '', 'lulacssbuy13@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', '', '', NULL),
+(30, 'FvdQNhiFapY1XQCC7YeoyGzOe9s2', '1231', 'filippieamaral', '', NULL, '', 'filippieamaral@gmail.com', '', '', '[]', '[]', '[]', '', 'Jurídica', '213', '213213', NULL),
+(32, 'gFZ42GnGRbNmKuR4zQnDAQSZMeX2', 'matheus', 'matheuszor14', '', NULL, '', 'matheuszor14@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', '', '', NULL),
+(33, 'gBCXwrfl1zNNYThLI6LL7laUjLj1', '123123', 'filippielindoo', '', NULL, '', 'filippielindoo@gmail.com', '', '', '[]', '[]', '[]', '', 'Física', '', '', NULL);
 
 -- --------------------------------------------------------
 
@@ -154,7 +159,8 @@ ALTER TABLE `candidaturas`
   ADD PRIMARY KEY (`id_candidatura`),
   ADD KEY `vaga_id` (`vaga_id`),
   ADD KEY `user_id` (`user_id`),
-  ADD KEY `status` (`status`);
+  ADD KEY `status` (`status`),
+  ADD KEY `fk_recrutador` (`recrutador_id`);
 
 --
 -- Índices de tabela `usuarios`
@@ -187,7 +193,7 @@ ALTER TABLE `candidaturas`
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT de tabela `vagas`
@@ -204,6 +210,7 @@ ALTER TABLE `vagas`
 --
 ALTER TABLE `candidaturas`
   ADD CONSTRAINT `candidaturas_ibfk_1` FOREIGN KEY (`vaga_id`) REFERENCES `vagas` (`id_vagas`),
+  ADD CONSTRAINT `fk_recrutador` FOREIGN KEY (`recrutador_id`) REFERENCES `usuarios` (`id`),
   ADD CONSTRAINT `fk_user_id` FOREIGN KEY (`user_id`) REFERENCES `usuarios` (`id`);
 
 --

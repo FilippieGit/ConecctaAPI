@@ -142,6 +142,14 @@ try {
             );
             break;
 
+
+              case 'getCandidaturasRecusadas':
+            validateParameters(['recrutador_id']);
+            $recrutador_id = (int)$inputData['recrutador_id'];
+            $response['candidaturas'] = $db->getCandidaturasRecusadas($recrutador_id);
+            $response['count'] = count($response['candidaturas']);
+            break;
+
         case 'atualizarStatusCandidatura':
             header('Content-Type: application/json');
 
@@ -235,42 +243,43 @@ try {
             break;
 
         case 'candidatarVaga':
-            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-                http_response_code(405);
-                echo json_encode(['error' => true, 'message' => 'Método POST requerido']);
-                exit();
-            }
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['error' => true, 'message' => 'Método POST requerido']);
+        exit();
+    }
 
-            // Aqui estamos pegando os dados do corpo da requisição
-            $postData = getRequestData();
+    // Aqui estamos pegando os dados do corpo da requisição
+    $postData = getRequestData();
 
-            if (!isset($postData['user_id']) || !isset($postData['vaga_id'])) {
-                http_response_code(400);
-                echo json_encode(['error' => true, 'message' => 'Parâmetros user_id e vaga_id são obrigatórios']);
-                exit();
-            }
+    if (!isset($postData['user_id']) || !isset($postData['vaga_id'])) {
+        http_response_code(400);
+        echo json_encode(['error' => true, 'message' => 'Parâmetros user_id e vaga_id são obrigatórios']);
+        exit();
+    }
 
-            $firebase_uid = $postData['user_id']; // <- esse é o UID vindo do Firebase
-            $vaga_id = (int)$postData['vaga_id'];
-            $respostas = isset($postData['respostas']) ? $postData['respostas'] : null;
+    $firebase_uid = $postData['user_id'];
+    $vaga_id = (int)$postData['vaga_id'];
+    $respostas = isset($postData['respostas']) ? $postData['respostas'] : null;
+    $recrutador_id = isset($postData['recrutador_id']) ? $postData['recrutador_id'] : null;
 
-            // Validar se respostas é JSON válido (opcional)
-            if ($respostas !== null) {
-                json_decode($respostas);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    http_response_code(400);
-                    echo json_encode(['error' => true, 'message' => 'Formato das respostas inválido']);
-                    exit();
-                }
-            }
+    // Validar se respostas é JSON válido (opcional)
+    if ($respostas !== null) {
+        json_decode($respostas);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            http_response_code(400);
+            echo json_encode(['error' => true, 'message' => 'Formato das respostas inválido']);
+            exit();
+        }
+    }
 
-            // Chama a função passando o UID do Firebase
-            $response = $db->candidatarVaga($firebase_uid, $vaga_id, $respostas);
+    // Chama a função passando todos os parâmetros
+    $response = $db->candidatarVaga($firebase_uid, $vaga_id, $respostas, $recrutador_id);
 
-            // Código de retorno
-            http_response_code(isset($response['code']) ? $response['code'] : ($response['error'] ? 500 : 200));
-            echo json_encode($response);
-            break;
+    // Código de retorno
+    http_response_code(isset($response['code']) ? $response['code'] : ($response['error'] ? 500 : 200));
+    echo json_encode($response);
+    break;
 
         case 'getUserByFirebaseUid':
             if (!isset($_GET['uid'])) {
@@ -291,6 +300,10 @@ try {
                 echo json_encode(['error' => true, 'message' => 'Usuário não encontrado']);
             }
             break;
+
+
+
+
 
 
 
@@ -327,7 +340,29 @@ case 'notificarTodosAprovados':
 
 
 
+case 'listarCandidaturasRejeitadas':
+    if (!isset($_GET['user_id'])) {
+        http_response_code(400);
+        echo json_encode([
+            'error' => true,
+            'message' => 'Parâmetro user_id é obrigatório'
+        ]);
+        exit();
+    }
 
+    $user_id = (int)$_GET['user_id'];
+    $response = $db->listarCandidaturasRejeitadas($user_id);
+
+    // Adiciona logs para depuração
+    error_log("Resposta listarCandidaturasRejeitadas: " . json_encode($response));
+
+    // Se houver erro, retorna código 500
+    if ($response['error']) {
+        http_response_code(500);
+    }
+
+    echo json_encode($response);
+    break;
 
 
 
@@ -366,6 +401,9 @@ case 'notificarTodosAprovados':
             $exclusaoData = validateParameters(['id_vaga']);
             $response = $db->excluirVagas((int)$exclusaoData['id_vaga']);
             break;
+
+
+            
 
         default:
             http_response_code(404);

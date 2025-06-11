@@ -735,7 +735,81 @@ private function enviarNotificacaoPush($token, $titulo, $mensagem, $dados = []) 
 
 
 
-
+public function getCandidaturasRecusadas($recrutador_id)
+    {
+        try {
+            // Primeiro, obtemos todas as vagas desse recrutador
+            $stmtVagas = $this->con->prepare("SELECT id_vagas FROM vagas WHERE id_usuario = ?");
+            $stmtVagas->bind_param("i", $recrutador_id);
+            $stmtVagas->execute();
+            $resultVagas = $stmtVagas->get_result();
+            
+            $vagaIds = [];
+            while ($row = $resultVagas->fetch_assoc()) {
+                $vagaIds[] = $row['id_vagas'];
+            }
+            
+            if (empty($vagaIds)) {
+                return [];
+            }
+            
+            // Agora buscamos as candidaturas recusadas para essas vagas
+            $placeholders = implode(',', array_fill(0, count($vagaIds), '?'));
+            $query = "SELECT 
+                        c.id_candidatura,
+                        c.vaga_id,
+                        c.user_id,
+                        c.respostas,
+                        c.data_candidatura,
+                        c.status,
+                        c.data_atualizacao,
+                        c.motivo_rejeicao,
+                        c.recrutador_id,
+                        u.nome AS nome_candidato,
+                        u.email AS email_candidato,
+                        u.telefone AS telefone_candidato,
+                        v.titulo AS titulo_vaga
+                      FROM candidaturas c
+                      JOIN usuarios u ON c.user_id = u.id
+                      JOIN vagas v ON c.vaga_id = v.id_vagas
+                      WHERE c.vaga_id IN ($placeholders) AND c.status = 'rejeitada'
+                      ORDER BY c.data_atualizacao DESC";
+            
+            $stmt = $this->con->prepare($query);
+            
+            // Bind dos parâmetros dinamicamente
+            $types = str_repeat('i', count($vagaIds));
+            $stmt->bind_param($types, ...$vagaIds);
+            
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $candidaturas = [];
+            while ($row = $result->fetch_assoc()) {
+                // Decodifica as respostas JSON se existirem
+                if (!empty($row['respostas'])) {
+                    $row['respostas'] = json_decode($row['respostas'], true);
+                }
+                
+                // Formata as datas
+                if (!empty($row['data_candidatura'])) {
+                    $row['data_candidatura_formatada'] = date('d/m/Y H:i', strtotime($row['data_candidatura']));
+                }
+                
+                if (!empty($row['data_atualizacao'])) {
+                    $row['data_atualizacao_formatada'] = date('d/m/Y H:i', strtotime($row['data_atualizacao']));
+                }
+                
+                $candidaturas[] = $row;
+            }
+            
+            return $candidaturas;
+            
+        } catch (Exception $e) {
+            error_log("Erro ao buscar candidaturas recusadas: " . $e->getMessage());
+            return [];
+        }
+    }
 
 
 
@@ -801,6 +875,11 @@ private function enviarNotificacaoPush($token, $titulo, $mensagem, $dados = []) 
     }
 }
 
+
+
+
+
+
     // Verificar se usuário já se candidatou a uma vaga
     function verificarCandidatura($user_id, $vaga_id) {
         $stmt = $this->con->prepare("SELECT id_candidatura FROM candidaturas WHERE user_id = ? AND vaga_id = ?");
@@ -812,64 +891,141 @@ private function enviarNotificacaoPush($token, $titulo, $mensagem, $dados = []) 
     }
 
     // Candidatar-se a uma vaga
-    function candidatarVaga($firebase_uid, $vaga_id, $respostas = null) {
-        try {
-            // Buscar o ID real do usuário com base no Firebase UID
-            $stmt = $this->con->prepare("SELECT id FROM usuarios WHERE firebase_uid = ?");
-            $stmt->bind_param("s", $firebase_uid);
-            $stmt->execute();
-            $result = $stmt->get_result();
+function candidatarVaga($firebase_uid, $vaga_id, $respostas = null, $recrutador_id = null) {
+    try {
+        // Buscar o ID real do usuário com base no Firebase UID
+        $stmt = $this->con->prepare("SELECT id FROM usuarios WHERE firebase_uid = ?");
+        $stmt->bind_param("s", $firebase_uid);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-            if ($result->num_rows === 0) {
-                return [
-                    'error' => true,
-                    'message' => 'Usuário não encontrado',
-                    'code' => 404
-                ];
-            }
-
-            $row = $result->fetch_assoc();
-            $user_id = $row['id'];
-
-            // Verificar se já está candidatado
-            $stmt = $this->con->prepare("SELECT id_candidatura FROM candidaturas WHERE user_id = ? AND vaga_id = ?");
-            $stmt->bind_param("ii", $user_id, $vaga_id);
-            $stmt->execute();
-            $stmt->store_result();
-
-            if ($stmt->num_rows > 0) {
-                return [
-                    'error' => true,
-                    'message' => 'Você já se candidatou a esta vaga',
-                    'code' => 409 // Conflict
-                ];
-            }
-
-            // Inserir nova candidatura
-            $stmt = $this->con->prepare("INSERT INTO candidaturas (vaga_id, user_id, respostas, status) VALUES (?, ?, ?, 'pendente')");
-            $stmt->bind_param("iis", $vaga_id, $user_id, $respostas);
-
-            if ($stmt->execute()) {
-                // Atualizar contador de candidatos na vaga
-                $this->con->query("UPDATE vagas SET id_candidato = id_candidato + 1 WHERE id_vagas = $vaga_id");
-
-                return [
-                    'error' => false,
-                    'message' => 'Candidatura realizada com sucesso',
-                    'id_candidatura' => $stmt->insert_id
-                ];
-            } else {
-                throw new Exception('Erro ao registrar candidatura: ' . $stmt->error);
-            }
-
-        } catch (Exception $e) {
+        if ($result->num_rows === 0) {
             return [
                 'error' => true,
-                'message' => $e->getMessage(),
-                'code' => 500
+                'message' => 'Usuário não encontrado',
+                'code' => 404
             ];
         }
+
+        $row = $result->fetch_assoc();
+        $user_id = $row['id'];
+
+        // Verificar se já está candidatado
+        $stmt = $this->con->prepare("SELECT id_candidatura FROM candidaturas WHERE user_id = ? AND vaga_id = ?");
+        $stmt->bind_param("ii", $user_id, $vaga_id);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            return [
+                'error' => true,
+                'message' => 'Você já se candidatou a esta vaga',
+                'code' => 409 // Conflict
+            ];
+        }
+
+        // Converter respostas para string JSON se for um objeto/array
+        if ($respostas !== null && (is_array($respostas) || is_object($respostas))) {
+            $respostas = json_encode($respostas, JSON_UNESCAPED_UNICODE);
+        }
+
+        // Tratar recrutador_id NULL
+        if ($recrutador_id === null || $recrutador_id === 'NULL') {
+            // Inserir sem recrutador_id (será NULL no banco)
+            $stmt = $this->con->prepare("INSERT INTO candidaturas 
+                                       (vaga_id, user_id, respostas, status) 
+                                       VALUES (?, ?, ?, 'pendente')");
+            $stmt->bind_param("iis", $vaga_id, $user_id, $respostas);
+        } else {
+            // Inserir com recrutador_id
+            $stmt = $this->con->prepare("INSERT INTO candidaturas 
+                                       (vaga_id, user_id, respostas, status, recrutador_id) 
+                                       VALUES (?, ?, ?, 'pendente', ?)");
+            $stmt->bind_param("iisi", $vaga_id, $user_id, $respostas, $recrutador_id);
+        }
+
+        if ($stmt->execute()) {
+            // Atualizar contador de candidatos na vaga
+            $this->con->query("UPDATE vagas SET id_candidato = id_candidato + 1 WHERE id_vagas = $vaga_id");
+
+            return [
+                'error' => false,
+                'message' => 'Candidatura realizada com sucesso',
+                'id_candidatura' => $stmt->insert_id,
+                'user_id' => $user_id,
+                'vaga_id' => $vaga_id,
+                'recrutador_id' => $recrutador_id
+            ];
+        } else {
+            throw new Exception('Erro ao registrar candidatura: ' . $stmt->error);
+        }
+
+    } catch (Exception $e) {
+        return [
+            'error' => true,
+            'message' => $e->getMessage(),
+            'code' => 500
+        ];
     }
+}
+
+
+public function listarRejeitadas($user_id) {
+        try {
+            $query = "SELECT 
+                        c.id_candidatura,
+                        c.vaga_id,
+                        c.status,
+                        c.motivo_rejeicao,
+                        c.data_atualizacao,
+                        v.titulo AS titulo_vaga,
+                        e.nome AS nome_empresa
+                      FROM 
+                        candidaturas c
+                      JOIN 
+                        vagas v ON c.vaga_id = v.id_vagas
+                      JOIN 
+                        empresas e ON v.empresa_id = e.id_empresa
+                      WHERE 
+                        c.user_id = ? AND c.status = 'rejeitada'
+                      ORDER BY 
+                        c.data_atualizacao DESC";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            
+            $result = $stmt->get_result();
+            
+            $candidaturas = array();
+            
+            while ($row = $result->fetch_assoc()) {
+                $candidatura = array(
+                    "id_candidatura" => $row['id_candidatura'],
+                    "vaga_id" => $row['vaga_id'],
+                    "titulo_vaga" => $row['titulo_vaga'],
+                    "nome_empresa" => $row['nome_empresa'],
+                    "status" => $row['status'],
+                    "motivo_rejeicao" => $row['motivo_rejeicao'],
+                    "data_atualizacao" => $row['data_atualizacao']
+                );
+                array_push($candidaturas, $candidatura);
+            }
+            
+            return array(
+                "error" => false,
+                "candidaturas" => $candidaturas
+            );
+            
+        } catch (Exception $e) {
+            return array(
+                "error" => true,
+                "message" => $e->getMessage()
+            );
+        }
+    }
+
+
 
     // Listar candidaturas de uma vaga (para a empresa)
     function listarCandidaturas($vaga_id) {

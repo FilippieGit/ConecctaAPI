@@ -344,29 +344,34 @@
 
   <script>
     document.getElementById('formVaga').addEventListener('submit', async function (e) {
-      e.preventDefault();
+    e.preventDefault();
 
-      const formData = new FormData(this);
-      const data = Object.fromEntries(formData.entries());
-      const params = new URLSearchParams(data);
-
-      try {
-        const response = await fetch('http://localhost/ConecctaAPI/v1/Api.php?apicall=cadastrarVaga', {
-          method: 'POST',
-          body: params,
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Adiciona o apicall ao objeto de dados
+    data.apicall = 'cadastrarVaga';
+    
+    try {
+        const response = await fetch('http://localhost/ConecctaAPI/v1/Api.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(data).toString()
         });
 
         const json = await response.json();
         if (json.error) {
-          alert('Erro: ' + json.message);
+            alert('Erro: ' + json.message);
         } else {
-          alert('Vaga cadastrada com sucesso!');
-          this.reset(); // Limpa o formulário
+            alert('Vaga cadastrada com sucesso!');
+            this.reset();
         }
-      } catch (err) {
+    } catch (err) {
         alert('Erro ao enviar: ' + err.message);
-      }
-    });
+    }
+});
   </script>
 </body>
 </html>
